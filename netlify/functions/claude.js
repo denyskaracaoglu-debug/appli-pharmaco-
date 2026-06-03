@@ -5,7 +5,7 @@ exports.handler = async function(event, context) {
 
   const API_KEY = process.env.ANTHROPIC_API_KEY;
   if (!API_KEY) {
-    return { statusCode: 500, body: JSON.stringify({ error: 'Clé API non configurée' }) };
+    return { statusCode: 500, body: JSON.stringify({ error: 'Cle API non configuree' }) };
   }
 
   try {
@@ -18,7 +18,7 @@ exports.handler = async function(event, context) {
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-       model: 'claude-sonnet-4-5'
+        model: 'claude-haiku-4-5-20251001',
         max_tokens: 1000,
         messages: body.messages
       })
