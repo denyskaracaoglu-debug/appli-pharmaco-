@@ -275,8 +275,10 @@ function retryQuiz(){ startQuiz(currentPool); }
 async function loadQuestion(){
   setLoading(true,"Génération de la question...");
   clearQuestion();
+
   const theme = currentPool[Math.floor(Math.random()*currentPool.length)];
   const qtype = Q_TYPES[Math.floor(Math.random()*Q_TYPES.length)];
+
   document.getElementById("q-num-label").textContent = `Question ${currentQIndex+1}`;
   document.getElementById("prog-fill").style.width = `${Math.min(5+currentQIndex*10,95)}%`;
   document.getElementById("q-chap-badge").textContent = theme.name;
@@ -286,27 +288,25 @@ async function loadQuestion(){
 
   let prompt = "";
   if(qtype==="QCM"){
-    prompt=`Tu es professeur de pharmacologie. Génère une QCM sur "${theme.name}".
+    prompt=`Génère une QCM de pharmacologie sur le thème "${theme.name}".
 Cours: ${theme.content}
 
-IMPORTANT: Reponds UNIQUEMENT avec un objet JSON brut, sans backticks, sans markdown, sans texte avant ou apres.
-Les valeurs ne doivent pas contenir de guillemets doubles - utilise des guillemets simples si necessaire.
-Format exact:
-{"question":"texte de la question","options":["A) option1","B) option2","C) option3","D) option4"],"correct":"B","explanation":"explication courte"}`;
+Réponds UNIQUEMENT avec ce JSON, rien d'autre, pas de backticks:
+{"question":"...","options":["A) ...","B) ...","C) ...","D) ..."],"correct":"A","explanation":"..."}
+
+La valeur de "correct" doit être exactement "A", "B", "C" ou "D".`;
   } else if(qtype==="Question ouverte"){
-    prompt=`Tu es professeur de pharmacologie. Génère une question ouverte sur "${theme.name}".
+    prompt=`Génère une question ouverte de pharmacologie sur le thème "${theme.name}".
 Cours: ${theme.content}
 
-IMPORTANT: Reponds UNIQUEMENT avec un objet JSON brut, sans backticks, sans markdown.
-Format exact:
-{"question":"texte de la question","expectedPoints":["point1","point2","point3"]}`;
+Réponds UNIQUEMENT avec ce JSON, rien d'autre, pas de backticks:
+{"question":"...","expectedPoints":["...","...","..."]}`;
   } else {
-    prompt=`Tu es professeur de pharmacologie. Génère un cas clinique sur "${theme.name}".
+    prompt=`Génère un cas clinique de pharmacologie sur le thème "${theme.name}".
 Cours: ${theme.content}
 
-IMPORTANT: Reponds UNIQUEMENT avec un objet JSON brut, sans backticks, sans markdown.
-Format exact:
-{"scenario":"description du cas","question":"question posee","expectedPoints":["point1","point2"]}`;
+Réponds UNIQUEMENT avec ce JSON, rien d'autre, pas de backticks:
+{"scenario":"...","question":"...","expectedPoints":["...","..."]}`;
   }
 
   try{
@@ -315,32 +315,35 @@ Format exact:
       headers:{"Content-Type":"application/json"},
       body:JSON.stringify({messages:[{role:"user",content:prompt}]})
     });
+
+    if(!resp.ok) throw new Error("HTTP "+resp.status);
+
     const data = await resp.json();
-    const raw = data.content.map(b=>b.text||"").join("");
-    // Nettoyage robuste : on extrait le premier {...} trouvé dans la réponse
-    const cleaned = raw.replace(/```json|```/g,"").trim();
-    const jsonStart = cleaned.indexOf("{");
-    const jsonEnd = cleaned.lastIndexOf("}");
-    if(jsonStart === -1 || jsonEnd === -1) throw new Error("Pas de JSON trouvé");
-    const q = JSON.parse(cleaned.slice(jsonStart, jsonEnd+1));
-    q.type = qtype; q.theme = theme;
+    if(!data.content) throw new Error("Pas de contenu");
+
+    const raw = data.content.map(b=>b.text||"").join("").trim();
+    const start = raw.indexOf("{");
+    const end = raw.lastIndexOf("}");
+    if(start === -1 || end === -1) throw new Error("JSON introuvable");
+
+    const q = JSON.parse(raw.slice(start, end+1));
+
+    if(qtype==="QCM" && (!q.question || !Array.isArray(q.options) || !q.correct)){
+      throw new Error("Structure QCM invalide");
+    }
+
+    q.type = qtype;
+    q.theme = theme;
     questions.push(q);
     setLoading(false);
     renderQuestion(q);
+
   } catch(e){
-    // En cas d'échec, on réessaie automatiquement une fois
-    if(!loadQuestion._retry){
-      loadQuestion._retry = true;
-      setTimeout(()=>{ loadQuestion._retry=false; loadQuestion(); }, 500);
-    } else {
-      loadQuestion._retry = false;
-      setLoading(false);
-      document.getElementById("q-text").textContent = "Erreur de génération. Appuie sur 'Question suivante' pour réessayer.";
-      document.getElementById("q-actions").innerHTML=`<button class="btn-primary" onclick="loadQuestion()">🔄 Réessayer</button>`;
-    }
+    setLoading(false);
+    document.getElementById("q-text").textContent = "La question n'a pas pu être générée.";
+    document.getElementById("q-actions").innerHTML=`<button class="btn-primary" onclick="nextQuestion()">🔄 Nouvelle question</button>`;
   }
 }
-
 function clearQuestion(){
   document.getElementById("q-scenario").style.display="none";
   document.getElementById("q-text").textContent="";
