@@ -286,17 +286,27 @@ async function loadQuestion(){
 
   let prompt = "";
   if(qtype==="QCM"){
-    prompt=`Tu es professeur de pharmacologie. Génère une QCM sur "${theme.name}". Cours: ${theme.content}
-Réponds UNIQUEMENT en JSON valide sans backticks:
-{"question":"...","options":["A) ...","B) ...","C) ...","D) ..."],"correct":"A","explanation":"..."}`;
+    prompt=`Tu es professeur de pharmacologie. Génère une QCM sur "${theme.name}".
+Cours: ${theme.content}
+
+IMPORTANT: Reponds UNIQUEMENT avec un objet JSON brut, sans backticks, sans markdown, sans texte avant ou apres.
+Les valeurs ne doivent pas contenir de guillemets doubles - utilise des guillemets simples si necessaire.
+Format exact:
+{"question":"texte de la question","options":["A) option1","B) option2","C) option3","D) option4"],"correct":"B","explanation":"explication courte"}`;
   } else if(qtype==="Question ouverte"){
-    prompt=`Tu es professeur de pharmacologie. Génère une question ouverte sur "${theme.name}". Cours: ${theme.content}
-Réponds UNIQUEMENT en JSON valide sans backticks:
-{"question":"...","expectedPoints":["point1","point2","point3"]}`;
+    prompt=`Tu es professeur de pharmacologie. Génère une question ouverte sur "${theme.name}".
+Cours: ${theme.content}
+
+IMPORTANT: Reponds UNIQUEMENT avec un objet JSON brut, sans backticks, sans markdown.
+Format exact:
+{"question":"texte de la question","expectedPoints":["point1","point2","point3"]}`;
   } else {
-    prompt=`Tu es professeur de pharmacologie. Génère un cas clinique sur "${theme.name}". Cours: ${theme.content}
-Réponds UNIQUEMENT en JSON valide sans backticks:
-{"scenario":"...","question":"...","expectedPoints":["point1","point2"]}`;
+    prompt=`Tu es professeur de pharmacologie. Génère un cas clinique sur "${theme.name}".
+Cours: ${theme.content}
+
+IMPORTANT: Reponds UNIQUEMENT avec un objet JSON brut, sans backticks, sans markdown.
+Format exact:
+{"scenario":"description du cas","question":"question posee","expectedPoints":["point1","point2"]}`;
   }
 
   try{
@@ -307,14 +317,27 @@ Réponds UNIQUEMENT en JSON valide sans backticks:
     });
     const data = await resp.json();
     const raw = data.content.map(b=>b.text||"").join("");
-    const q = JSON.parse(raw.replace(/```json|```/g,"").trim());
+    // Nettoyage robuste : on extrait le premier {...} trouvé dans la réponse
+    const cleaned = raw.replace(/```json|```/g,"").trim();
+    const jsonStart = cleaned.indexOf("{");
+    const jsonEnd = cleaned.lastIndexOf("}");
+    if(jsonStart === -1 || jsonEnd === -1) throw new Error("Pas de JSON trouvé");
+    const q = JSON.parse(cleaned.slice(jsonStart, jsonEnd+1));
     q.type = qtype; q.theme = theme;
     questions.push(q);
     setLoading(false);
     renderQuestion(q);
   } catch(e){
-    setLoading(false);
-    document.getElementById("q-text").textContent = "Erreur de génération. Vérifie ta connexion.";
+    // En cas d'échec, on réessaie automatiquement une fois
+    if(!loadQuestion._retry){
+      loadQuestion._retry = true;
+      setTimeout(()=>{ loadQuestion._retry=false; loadQuestion(); }, 500);
+    } else {
+      loadQuestion._retry = false;
+      setLoading(false);
+      document.getElementById("q-text").textContent = "Erreur de génération. Appuie sur 'Question suivante' pour réessayer.";
+      document.getElementById("q-actions").innerHTML=`<button class="btn-primary" onclick="loadQuestion()">🔄 Réessayer</button>`;
+    }
   }
 }
 
