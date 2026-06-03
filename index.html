@@ -4,817 +4,318 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Quiz Pharmacologie</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0f0f13;
-    --surface: #1a1a22;
-    --surface2: #22222e;
-    --border: #2e2e3e;
-    --accent: #7c6af7;
-    --accent2: #a78bfa;
-    --green: #34d399;
-    --red: #f87171;
-    --amber: #fbbf24;
-    --text: #f0f0f5;
-    --muted: #8888aa;
-    --radius: 12px;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { height: 100%; }
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    padding: 0;
-  }
-
-  /* BG decoration */
-  body::before {
-    content: '';
-    position: fixed;
-    top: -200px; right: -200px;
-    width: 600px; height: 600px;
-    background: radial-gradient(circle, rgba(124,106,247,0.12) 0%, transparent 70%);
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  #app {
-    position: relative;
-    z-index: 1;
-    max-width: 680px;
-    margin: 0 auto;
-    padding: 2rem 1.25rem 4rem;
-  }
-
-  /* HEADER */
-  .app-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 2.5rem;
-  }
-  .logo {
-    width: 40px; height: 40px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 20px;
-  }
-  .app-title { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; }
-  .app-subtitle { font-size: 13px; color: var(--muted); }
-
-  /* CARDS */
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1.5rem;
-    margin-bottom: 1rem;
-  }
-
-  /* SCREEN SYSTEM */
-  .screen { display: none; }
-  .screen.active { display: block; }
-
-  /* CHAPTER CHIPS */
-  .chapter-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 10px;
-    margin-top: 1rem;
-  }
-  .chapter-chip {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 0.9rem 1rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    text-align: left;
-  }
-  .chapter-chip:hover {
-    border-color: var(--accent);
-    background: rgba(124,106,247,0.1);
-    transform: translateY(-2px);
-  }
-  .chapter-chip .ch-icon { font-size: 22px; margin-bottom: 6px; display: block; }
-  .chapter-chip .ch-name { font-size: 13px; font-weight: 500; color: var(--text); line-height: 1.4; }
-
-  /* MODE BUTTONS */
-  .mode-btn {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    width: 100%;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1.1rem 1.25rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    margin-bottom: 10px;
-    text-align: left;
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-  }
-  .mode-btn:hover { border-color: var(--accent); background: rgba(124,106,247,0.08); }
-  .mode-icon {
-    width: 42px; height: 42px;
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 20px;
-    flex-shrink: 0;
-  }
-  .mode-btn .m-title { font-size: 15px; font-weight: 500; }
-  .mode-btn .m-desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
-
-  /* PROGRESS */
-  .progress-track {
-    background: var(--surface2);
-    border-radius: 99px;
-    height: 4px;
-    margin-bottom: 1.5rem;
-    overflow: hidden;
-  }
-  .progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
-    border-radius: 99px;
-    transition: width 0.4s ease;
-  }
-
-  /* QUESTION */
-  .q-meta {
-    display: flex; align-items: center; gap: 8px;
-    margin-bottom: 1rem;
-    flex-wrap: wrap;
-  }
-  .badge {
-    font-size: 11px;
-    font-weight: 500;
-    padding: 3px 10px;
-    border-radius: 99px;
-    letter-spacing: 0.02em;
-  }
-  .badge-chapter { background: rgba(124,106,247,0.2); color: var(--accent2); border: 1px solid rgba(124,106,247,0.3); }
-  .badge-qcm { background: rgba(52,211,153,0.15); color: var(--green); border: 1px solid rgba(52,211,153,0.3); }
-  .badge-open { background: rgba(251,191,36,0.15); color: var(--amber); border: 1px solid rgba(251,191,36,0.3); }
-  .badge-case { background: rgba(248,113,113,0.15); color: var(--red); border: 1px solid rgba(248,113,113,0.3); }
-
-  .q-scenario {
-    background: var(--surface2);
-    border-left: 3px solid var(--accent);
-    border-radius: 0 8px 8px 0;
-    padding: 0.9rem 1rem;
-    font-size: 14px;
-    color: var(--muted);
-    line-height: 1.7;
-    margin-bottom: 1rem;
-  }
-  .q-text {
-    font-family: 'Syne', sans-serif;
-    font-size: 17px;
-    font-weight: 600;
-    line-height: 1.5;
-    margin-bottom: 1.25rem;
-  }
-
-  /* OPTIONS */
-  .option-btn {
-    display: block;
-    width: 100%;
-    text-align: left;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 0.85rem 1rem;
-    margin-bottom: 8px;
-    cursor: pointer;
-    font-size: 14px;
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    transition: all 0.15s;
-    line-height: 1.5;
-  }
-  .option-btn:hover:not(:disabled) { border-color: var(--accent); background: rgba(124,106,247,0.08); }
-  .option-btn.correct { border-color: var(--green); background: rgba(52,211,153,0.1); color: var(--green); }
-  .option-btn.wrong { border-color: var(--red); background: rgba(248,113,113,0.1); color: var(--red); }
-
-  /* TEXTAREA */
-  textarea {
-    width: 100%;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 0.85rem 1rem;
-    font-size: 14px;
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    resize: vertical;
-    min-height: 110px;
-    line-height: 1.6;
-  }
-  textarea:focus { outline: none; border-color: var(--accent); }
-
-  /* FEEDBACK */
-  .feedback {
-    border-radius: 10px;
-    padding: 1rem 1.1rem;
-    margin-top: 1rem;
-    font-size: 14px;
-    line-height: 1.7;
-    display: none;
-  }
-  .feedback.show { display: block; }
-  .feedback.good { background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.3); color: #86efac; }
-  .feedback.partial { background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.3); color: #fde68a; }
-  .feedback.bad { background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.3); color: #fca5a5; }
-
-  /* BUTTONS */
-  .btn-primary {
-    width: 100%;
-    padding: 0.85rem;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    color: white;
-    border: none;
-    border-radius: 10px;
-    font-size: 15px;
-    font-weight: 500;
-    font-family: 'DM Sans', sans-serif;
-    cursor: pointer;
-    transition: opacity 0.15s, transform 0.1s;
-    margin-top: 0.75rem;
-  }
-  .btn-primary:hover { opacity: 0.9; }
-  .btn-primary:active { transform: scale(0.98); }
-  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-
-  .btn-ghost {
-    width: 100%;
-    padding: 0.85rem;
-    background: transparent;
-    color: var(--muted);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    font-size: 15px;
-    font-family: 'DM Sans', sans-serif;
-    cursor: pointer;
-    transition: all 0.15s;
-    margin-top: 8px;
-  }
-  .btn-ghost:hover { border-color: var(--accent); color: var(--text); }
-
-  .btn-back {
-    background: none;
-    border: none;
-    color: var(--muted);
-    font-size: 13px;
-    font-family: 'DM Sans', sans-serif;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-bottom: 1.25rem;
-    padding: 0;
-  }
-  .btn-back:hover { color: var(--text); }
-
-  /* SCORE */
-  .score-ring {
-    width: 90px; height: 90px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, rgba(124,106,247,0.3), rgba(167,139,250,0.2));
-    border: 2px solid var(--accent);
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    margin: 0 auto 1.25rem;
-  }
-  .score-num { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; color: var(--accent2); }
-  .score-lbl { font-size: 11px; color: var(--muted); margin-top: -2px; }
-
-  /* LOADING */
-  .loading {
-    display: none;
-    align-items: center;
-    gap: 10px;
-    padding: 0.75rem 0;
-    color: var(--muted);
-    font-size: 14px;
-  }
-  .loading.show { display: flex; }
-  .spinner {
-    width: 18px; height: 18px;
-    border: 2px solid var(--border);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-    flex-shrink: 0;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* STAT ROW */
-  .stat-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 0;
-    border-bottom: 1px solid var(--border);
-    font-size: 14px;
-  }
-  .stat-row:last-child { border-bottom: none; }
-
-  /* COUNTER */
-  .q-counter {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.75rem;
-  }
-  .q-num { font-size: 13px; color: var(--muted); }
-
-  /* LABEL */
-  .section-label {
-    font-family: 'Syne', sans-serif;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 0.75rem;
-  }
-
-  .hidden { display: none !important; }
+:root{--bg:#0f0f13;--surface:#1a1a22;--surface2:#22222e;--border:#2e2e3e;--accent:#7c6af7;--accent2:#a78bfa;--green:#34d399;--red:#f87171;--amber:#fbbf24;--text:#f0f0f5;--muted:#8888aa;--radius:12px;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+body::before{content:"";position:fixed;top:-200px;right:-200px;width:600px;height:600px;background:radial-gradient(circle,rgba(124,106,247,0.12) 0%,transparent 70%);pointer-events:none;z-index:0;}
+#app{position:relative;z-index:1;max-width:680px;margin:0 auto;padding:2rem 1.25rem 4rem;}
+.header{display:flex;align-items:center;gap:12px;margin-bottom:2.5rem;}
+.logo{width:40px;height:40px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;}
+.app-title{font-family:"Syne",sans-serif;font-size:20px;font-weight:700;}
+.app-sub{font-size:13px;color:var(--muted);}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1rem;}
+.screen{display:none;}
+.screen.active{display:block;}
+.section-label{font-family:"Syne",sans-serif;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:0.75rem;}
+.mode-btn{display:flex;align-items:center;gap:14px;width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:1.1rem 1.25rem;cursor:pointer;transition:all 0.2s;margin-bottom:10px;text-align:left;color:var(--text);font-family:"DM Sans",sans-serif;}
+.mode-btn:hover{border-color:var(--accent);background:rgba(124,106,247,0.08);}
+.mode-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.m-title{font-size:15px;font-weight:500;}
+.m-desc{font-size:12px;color:var(--muted);margin-top:2px;}
+.chapter-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-top:1rem;}
+.chapter-chip{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:0.9rem 1rem;cursor:pointer;transition:all 0.2s;text-align:left;}
+.chapter-chip:hover{border-color:var(--accent);background:rgba(124,106,247,0.1);transform:translateY(-2px);}
+.ch-icon{font-size:22px;margin-bottom:6px;display:block;}
+.ch-name{font-size:13px;font-weight:500;color:var(--text);line-height:1.4;}
+.progress-track{background:var(--surface2);border-radius:99px;height:4px;margin-bottom:1.5rem;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:99px;transition:width 0.4s ease;}
+.q-counter{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;}
+.q-num{font-size:13px;color:var(--muted);}
+.btn-back{background:none;border:none;color:var(--muted);font-size:13px;font-family:"DM Sans",sans-serif;cursor:pointer;display:flex;align-items:center;gap:6px;padding:0;}
+.btn-back:hover{color:var(--text);}
+.badge{font-size:11px;font-weight:500;padding:3px 10px;border-radius:99px;letter-spacing:0.02em;}
+.badge-chapter{background:rgba(124,106,247,0.2);color:var(--accent2);border:1px solid rgba(124,106,247,0.3);}
+.badge-qcm{background:rgba(52,211,153,0.15);color:var(--green);border:1px solid rgba(52,211,153,0.3);}
+.badge-open{background:rgba(251,191,36,0.15);color:var(--amber);border:1px solid rgba(251,191,36,0.3);}
+.badge-case{background:rgba(248,113,113,0.15);color:var(--red);border:1px solid rgba(248,113,113,0.3);}
+.q-meta{display:flex;align-items:center;gap:8px;margin-bottom:1rem;flex-wrap:wrap;}
+.q-scenario{background:var(--surface2);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:0.9rem 1rem;font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:1rem;}
+.q-text{font-family:"Syne",sans-serif;font-size:17px;font-weight:600;line-height:1.5;margin-bottom:1.25rem;}
+.option-btn{display:block;width:100%;text-align:left;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:0.85rem 1rem;margin-bottom:8px;cursor:pointer;font-size:14px;color:var(--text);font-family:"DM Sans",sans-serif;transition:all 0.15s;line-height:1.5;}
+.option-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);}
+.option-btn.correct{border-color:var(--green);background:rgba(52,211,153,0.1);color:var(--green);}
+.option-btn.wrong{border-color:var(--red);background:rgba(248,113,113,0.1);color:var(--red);}
+textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:0.85rem 1rem;font-size:14px;color:var(--text);font-family:"DM Sans",sans-serif;resize:vertical;min-height:110px;line-height:1.6;}
+textarea:focus{outline:none;border-color:var(--accent);}
+.feedback{border-radius:10px;padding:1rem 1.1rem;margin-top:1rem;font-size:14px;line-height:1.7;display:none;}
+.feedback.show{display:block;}
+.feedback.good{background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.3);color:#86efac;}
+.feedback.partial{background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.3);color:#fde68a;}
+.feedback.bad{background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.3);color:#fca5a5;}
+.btn-primary{width:100%;padding:0.85rem;background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;border:none;border-radius:10px;font-size:15px;font-weight:500;font-family:"DM Sans",sans-serif;cursor:pointer;transition:opacity 0.15s;margin-top:0.75rem;}
+.btn-primary:hover{opacity:0.9;}
+.btn-ghost{width:100%;padding:0.85rem;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:10px;font-size:15px;font-family:"DM Sans",sans-serif;cursor:pointer;transition:all 0.15s;margin-top:8px;}
+.btn-ghost:hover{border-color:var(--accent);color:var(--text);}
+.score-ring{width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,rgba(124,106,247,0.3),rgba(167,139,250,0.2));border:2px solid var(--accent);display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 1.25rem;}
+.score-num{font-family:"Syne",sans-serif;font-size:26px;font-weight:800;color:var(--accent2);}
+.score-lbl{font-size:11px;color:var(--muted);margin-top:-2px;}
+.stat-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:14px;}
+.stat-row:last-child{border-bottom:none;}
+.loading{display:none;align-items:center;gap:10px;padding:0.75rem 0;color:var(--muted);font-size:14px;}
+.loading.show{display:flex;}
+.spinner{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.7s linear infinite;flex-shrink:0;}
+@keyframes spin{to{transform:rotate(360deg);}}
 </style>
 </head>
 <body>
 <div id="app">
-
-  <div class="app-header">
+  <div class="header">
     <div class="logo">💊</div>
-    <div>
-      <div class="app-title">Quiz Pharmacologie</div>
-      <div class="app-subtitle">Révision intelligente par IA</div>
-    </div>
+    <div><div class="app-title">Quiz Pharmacologie</div><div class="app-sub">Révision intelligente par IA</div></div>
   </div>
 
-  <!-- SCREEN: API Key -->
-  <div id="screen-apikey" class="screen active">
-    <div class="card" style="margin-top:2rem;">
-      <div style="text-align:center; margin-bottom:1.5rem;">
-        <div style="font-size:36px; margin-bottom:8px;">🔑</div>
-        <p style="font-family:'Syne',sans-serif; font-size:18px; font-weight:700; margin-bottom:6px;">Clé API Anthropic</p>
-        <p style="font-size:13px; color:var(--muted); line-height:1.6;">Entre ta clé API pour activer la génération de questions par IA.<br>Elle est stockée uniquement dans ton navigateur.</p>
-      </div>
-      <input type="password" id="api-key-input" placeholder="sk-ant-api03-..." style="width:100%; background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:0.85rem 1rem; font-size:14px; color:var(--text); font-family:'DM Sans',sans-serif; margin-bottom:8px;">
-      <p id="api-key-error" style="font-size:12px; color:var(--red); margin-bottom:8px; display:none;">Clé invalide. Elle doit commencer par "sk-ant-".</p>
-      <button class="btn-primary" onclick="saveApiKey()">Accéder au quiz →</button>
-      <p style="font-size:12px; color:var(--muted); text-align:center; margin-top:12px;">
-        Obtenir une clé sur <a href="https://console.anthropic.com" target="_blank" style="color:var(--accent2);">console.anthropic.com</a>
-      </p>
-    </div>
-  </div>
-
-  <!-- SCREEN: Mode -->
-  <div id="screen-mode" class="screen">
+  <div id="screen-mode" class="screen active">
     <div class="card">
       <p class="section-label">Comment veux-tu réviser ?</p>
-      <button class="mode-btn" onclick="startChapterMode()">
-        <div class="mode-icon" style="background:rgba(124,106,247,0.15);">📖</div>
-        <div>
-          <div class="m-title">Par chapitre</div>
-          <div class="m-desc">Travaille un chapitre précis en profondeur</div>
-        </div>
-      </button>
       <button class="mode-btn" onclick="startExamMode()">
         <div class="mode-icon" style="background:rgba(251,191,36,0.15);">🎯</div>
-        <div>
-          <div class="m-title">Mode examen</div>
-          <div class="m-desc">Mélange de tous les chapitres</div>
-        </div>
+        <div><div class="m-title">Mode examen</div><div class="m-desc">Mélange de tous les chapitres</div></div>
+      </button>
+      <button class="mode-btn" onclick="showScreen('chapters')">
+        <div class="mode-icon" style="background:rgba(124,106,247,0.15);">📖</div>
+        <div><div class="m-title">Par chapitre</div><div class="m-desc">Travaille un chapitre précis</div></div>
       </button>
     </div>
     <div class="card">
       <p class="section-label">Chapitres disponibles</p>
-      <div class="chapter-grid" id="chapters-list"></div>
+      <div class="chapter-grid" id="chapters-preview"></div>
     </div>
   </div>
 
-  <!-- SCREEN: Chapter select -->
   <div id="screen-chapters" class="screen">
-    <button class="btn-back" onclick="showScreen('mode')">← Retour</button>
+    <button class="btn-back" onclick="showScreen('mode')" style="margin-bottom:1rem;">← Retour</button>
     <div class="card">
       <p class="section-label">Choisir un chapitre</p>
       <div class="chapter-grid" id="chapter-select-grid"></div>
     </div>
   </div>
 
-  <!-- SCREEN: Quiz -->
   <div id="screen-quiz" class="screen">
     <div class="q-counter">
-      <button class="btn-back" onclick="showScreen('mode')" style="margin-bottom:0;">✕ Quitter</button>
+      <button class="btn-back" onclick="showScreen('mode')">✕ Quitter</button>
       <span class="q-num" id="q-num-label">Question 1</span>
     </div>
-    <div class="progress-track">
-      <div class="progress-fill" id="prog-fill" style="width:5%"></div>
-    </div>
-
+    <div class="progress-track"><div class="progress-fill" id="prog-fill" style="width:5%"></div></div>
     <div class="card" id="q-card">
       <div class="q-meta">
         <span class="badge badge-chapter" id="q-chap-badge"></span>
         <span class="badge" id="q-type-badge"></span>
       </div>
-      <div id="q-scenario" class="q-scenario hidden"></div>
+      <div id="q-scenario" class="q-scenario" style="display:none;"></div>
       <div class="q-text" id="q-text"></div>
       <div id="q-options"></div>
-      <textarea id="q-textarea" placeholder="Écris ta réponse ici..." class="hidden"></textarea>
+      <textarea id="q-textarea" placeholder="Écris ta réponse ici..." style="display:none;"></textarea>
       <div class="feedback" id="q-feedback"></div>
     </div>
-
-    <div class="loading" id="q-loading"><div class="spinner"></div><span id="q-loading-text">Génération de la question...</span></div>
+    <div class="loading" id="q-loading"><div class="spinner"></div><span id="q-loading-text">Génération...</span></div>
     <div id="q-actions"></div>
   </div>
 
-  <!-- SCREEN: Results -->
   <div id="screen-results" class="screen">
-    <div class="card" style="text-align:center; padding: 2rem 1.5rem;">
-      <div class="score-ring">
-        <span class="score-num" id="res-pct">0%</span>
-        <span class="score-lbl">Score</span>
-      </div>
-      <p style="font-family:'Syne',sans-serif; font-size:20px; font-weight:700; margin-bottom:6px;" id="res-title"></p>
-      <p style="font-size:14px; color:var(--muted);" id="res-sub"></p>
+    <div class="card" style="text-align:center;padding:2rem 1.5rem;">
+      <div class="score-ring"><span class="score-num" id="res-pct">0%</span><span class="score-lbl">Score</span></div>
+      <p style="font-family:Syne,sans-serif;font-size:20px;font-weight:700;margin-bottom:6px;" id="res-title"></p>
+      <p style="font-size:14px;color:var(--muted);" id="res-sub"></p>
     </div>
     <div class="card" id="res-stats"></div>
     <button class="btn-primary" onclick="retryQuiz()">🔄 Nouveau quiz</button>
     <button class="btn-ghost" onclick="showScreen('mode')">Changer de mode</button>
   </div>
-
 </div>
 
 <script>
-let API_KEY = localStorage.getItem("pharma_api_key") || "";
-const MODEL = "claude-sonnet-4-20250514";
-
-function saveApiKey() {
-  const val = document.getElementById("api-key-input").value.trim();
-  const err = document.getElementById("api-key-error");
-  if (!val.startsWith("sk-ant-")) {
-    err.style.display = "block";
-    return;
-  }
-  err.style.display = "none";
-  API_KEY = val;
-  localStorage.setItem("pharma_api_key", val);
-  showScreen("mode");
-}
-
-// ===================== COURS =====================
 const CHAPTERS = [
-  {
-    id: "ch9_physio",
-    name: "Physiopathologie douleur & fièvre",
-    icon: "🧠",
-    content: `Thermorégulation: thermorécepteurs centraux et périphériques interagissent avec le centre thermorégulateur. Baisse température: sudation (glandes sudoripares) + vasodilatation. Hausse température: frisson (muscles) + production chaleur (adipocytes bruns) + vasoconstriction. Intermédiaires: prostaglandines, interleukines. Hypothalamus/noyau préoptique compare T° de référence aux signaux des thermorécepteurs. Centre thermogenèse vs thermolyse. Voies: SN somatique (frisson), SN sympathique (vasoconstriction, adrénaline), voie hormonale (TRH, TSH, T3, T4).
-
-Douleur: expérience subjective avec forte composante émotionnelle (affective). Nociception ≠ douleur. Douleur neuropathique = sans lésion tissulaire directe (AVC, herpès, neuropathie diabétique). Répond moins bien aux analgésiques classiques. EVA = Échelle Visuelle Analogique. PAG (zone grise périaqueductale) = élément clé voies descendantes inhibitrices. Reynolds 1969: stimulation électrique PAG → analgésie suffisante pour chirurgie abdominale. Récepteurs µ opioïdes exprimés dans: cortex insulaire (CI), amygdale (A), hypothalamus (H), PAG, RVM, corne dorsale.
-
-Fibres C (myélinisées): douleur sourde, diffuse, brûlante. Fibres Aδ (myélinisées): douleur aiguë, bien localisée. Douleur chronique: hyperalgésie (↑ douleur stimulus nocif léger), allodynie (douleur par stimulus non nocif), douleur spontanée. Douleur neuropathique: activité spontanée neurones sensoriels endommagés, canaux sodiques voltage-dépendants surexprimés, rôle système sympathique (adrénorécepteurs α). Médiateurs: BK (bradykinine), 5-HT, PGs, NGF, substance P, CGRP, GABA, NA.`
-  },
-  {
-    id: "ch9_paracetamol",
-    name: "Paracétamol",
-    icon: "💊",
-    content: `Paracétamol (acétaminophène aux USA): analgésique-antipyrétique non narcotique très utilisé. Excellente activité analgésique et antipyrétique par inhibition synthèse prostaglandines SNC. Faible activité anti-inflammatoire → pas classé AINS. Inhibiteur sélectif faible COX-2. COX-3 (épissage alternatif COX-1) dans SNC: cible potentielle. Mécanismes: potentialisation voie sérotoninergique descendante inhibitrice; métabolite AM404 active système endocannabinoïde et TRPV1.
-
-Pharmacocinétique: voie orale, métabolisme hépatique, demi-vie 2-4h. Toxicité adulte à partir 10g (facteurs risque: doses plus faibles). Enfants: toxicité hépatique > 150mg/kg. Mécanisme toxicité: saturation enzymes conjuguées → conversion par oxydases mixtes en NAPQI (N-acétyl-p-benzoquinone-imine). NAPQI + glutathion = inactivation. Si glutathion épuisé → liaison protéines cellulaires → mort cellulaire. Antidote: acétylcystéine IV ou méthionine orale (augmentent glutathion) si administrés précocement. Métabolisme hépatique: glucuronidation, sulfation, oxydation phase I (CYP2E1).
-
-Posologie adulte ≥50kg sans facteurs risque: 500mg-1g, max 4x/j (max 4g/j). Adulte <50kg: 15mg/kg max 4x/j. Avec facteurs risque adulte ≥50kg: max 3g/j. Facteurs risque: enfants, adultes <50kg, personnes âgées, alcoolisme, malnutrition, insuffisance hépatique/rénale.
-
-Interactions: alcool, barbituriques, phénytoïne, carbamazépine, isoniazide → ↑ risque hépatique en surdosage. Antagonistes vitamine K: renforcement effet anticoagulant à doses élevées. Métoclopramide/dompéridone: ↑ absorption. Charbon activé: ↓ absorption. Flucloxacilline: risque AMTAE (acidose métabolique trou anionique élevé). Contre-indications: insuffisance rénale sévère, insuffisance hépatique sévère. Effets indésirables: peu d'irritation GI. Surdosage: hépatotoxicité avec ictère/nécrose après 24-48h.`
-  },
-  {
-    id: "ch9_ains",
-    name: "AAS & autres analgésiques non-opioïdes",
-    icon: "🔬",
-    content: `Acide acétylsalicylique (aspirine): propriétés analgésiques, antipyrétiques et anti-inflammatoires (à doses élevées). Place limitée dans fièvre/douleur. Effet anti-inflammatoire nécessite doses élevées (rarement indiqué). Grossesse: éviter. T1: suspicion effet tératogène/abortif doses élevées. T3: prolongation grossesse, fermeture prématurée canal artériel. Périnatal: risque hémorragies. Posologie douleur/fièvre: 300mg+ jusqu'à 4-6x/j (max 4g/j). Inflammation: 3-6g/j. Interactions: risque hémorragie avec antithrombotiques, anticoagulants, AINS, ISRS, IRSN, alcool. AAS + AINS: suspicion ↓ effet cardioprotecteur. Syndrome de Reye (très rare) avec vaccin varicelle. CI: hémorragie active, antécédents ulcère gastro-duodénal, enfants <12 ans infection virale (grippe, varicelle), insuffisance rénale/hépatique sévère. Effets indésirables: irritation muqueuse gastrique, hémorragies gastriques, hypersensibilité (bronchospasme), inhibition prolongée agrégation plaquettaire.
-
-Métamizole: dérivé pyrazolone, propriétés antipyrétiques, analgésiques et spasmolytiques modérées. Pas d'effet anti-inflammatoire. Non première ligne. Retiré du marché dans certains pays. Effets indésirables graves: agranulocytose (toxicité hématologique grave), crise de porphyrie, réactions allergiques (anaphylaxie), réactions cutanées sévères (syndrome Lyell, Stevens-Johnson), hypotension IV, hémorragies gastriques. CI: hypotension, instabilité hémodynamique, affections hématologiques. En Belgique: Novalgine. PRAC sept 2024: mesures minimiser agranulocytose.
-
-Néfopam: mécanisme inconnu, uniquement propriétés analgésiques. CI: enfants, antécédents convulsions, IMAO, insuffisance rénale. Interactions: crises hypertensives sévères avec IMAO. Effets: nausées, sudation, somnolence, convulsions, effets anticholinergiques.
-
-Associations: paracétamol+caféine, aspirine+caféine, paracétamol+aspirine+caféine, etc. Caféine substrat/inhibiteur CYP1A2. Association codéine/caféine peut favoriser abus. Codéine toujours sur prescription.`
-  },
-  {
-    id: "ch9_approche",
-    name: "Approche médicamenteuse douleur & fièvre",
-    icon: "🏥",
-    content: `Fièvre: identifier et traiter la cause. Fièvre ne doit pas nécessairement être traitée. Antipyrétiques n'influencent pas convulsions fébriles. Premier choix: paracétamol oral. Ibuprofène aussi efficace mais plus d'effets indésirables. Ibuprofène déconseillé si déshydratation, diarrhée, insuffisance rénale, varicelle/zona. AAS: risque syndrome de Reye chez enfants avec infections virales → plus premier choix.
-
-Douleur aiguë nociceptive: identifier la cause MAIS ne pas retarder traitement. Étape 1: paracétamol. Étape 2: AINS courte durée (dose peut être augmentée ou associée au paracétamol). Étape 3: opioïde peu puissant (codéine ou tramadol). Dernier recours: opioïde puissant.
-
-Douleur chronique: diagnostic précis + évaluation biopsychosociale + réévaluations périodiques. Approche pluridisciplinaire. Administration selon schéma fixe (sans attendre réapparition douleur). Paracétamol: adulte sain max 3-4g/j; adulte <50kg/âgé/alcoolisme/insuffisance: 2-3g/j. Opioïdes puissants: place très limitée en douleur chronique non cancéreuse (< 3 mois). Réticence si toxicomanie, comorbidité psychique, alcoolisme. AINS et opioïdes place très limitée dans lombalgies chroniques.
-
-Douleur neuropathique chronique: antidépresseurs tricycliques (duloxétine), antiépileptiques (carbamazépine, gabapentine, prégabaline). Gabapentine/prégabaline off-label lombalgies: rapport bénéfice/risque défavorable. Tramadol et cannabis: données limitées.
-
-Soins palliatifs - Échelle OMS (4 paliers): Palier I: analgésique non opioïde (paracétamol, AINS, AAS). Palier II: + opioïde faible (codéine, tramadol). Palier III: + opioïde fort oral/transdermique (morphine, fentanyl, méthadone). Palier IV: opioïde fort parentéral (SC pompe, IV, épidurale, intrathécale) + paracétamol/AINS.`
-  },
-  {
-    id: "ch9_opioides",
-    name: "Les opioïdes",
-    icon: "⚗️",
-    content: `Histoire: opium = extrait Papaver somniferum (morphine + alcaloïdes). Utilisé depuis millénaires. Introduit Grande-Bretagne fin XVIIe "teinture de laudanum". Structure morphine déterminée en 1902. Morphine = dérivé phénanthrène. Partie importante: hydroxyle libre cycle benzénique lié par 2 carbones à azote. Substituant volumineux sur azote → activité antagoniste (naloxone). Variants: oxycodone (substitution hydroxyles), péthidine et fentanyl (structures très différentes), méthadone (conformation similaire en solution).
-
-Récepteurs: µ (MOPr), δ (DOPr), κ (KOPr), ORL1 (NOPr). Récepteur µ: analgésie supraspinale +++, dépression respiratoire +++, euphorie +++, dépendance physique +++, myosis ++, ↓ motilité GI ++. Récepteur κ: dysphorie/hallucinations +++, sédation ++. Récepteur δ: analgésie spinale ++. ORL1: catatonie ++.
-
-Classification par puissance: Peu puissants: codéine, dihydrocodéine, tramadol. Puissance modérée: péthidine, tilidine. Puissants: buprénorphine, fentanyl, hydromorphone, méthadone, morphine, oxycodone, piritramide, tapentadol. Agonistes purs: codéine, fentanyl, hydromorphone, méthadone, morphine, oxycodone, péthidine, piritramide, tapentadol, tilidine, tramadol. Agoniste partiel: buprénorphine. Agoniste/antagoniste mixte: pentazocine (anciennement).
-
-Effets morphine SNC: analgésie, hyperalgésie, euphorie, dépression respiratoire, inhibition réflexe toux, nausées/vomissements, myosis. Effets périphériques GI: constipation. Tolérance: besoin ↑ doses progressives. Tolérance à tous effets SAUF constipation. Dépendance physique + psychique. Sevrage physique: nausées, vomissements, diarrhée, vertiges, hypotension, hallucinations, douleurs musculaires. Sevrage psychique: dépression, anxiété, agressivité.
-
-Posologies: Morphine orale libération normale douleur aiguë: 10mg/4h (5mg chez âgé). Morphine orale libération prolongée: 10-30mg/12h. Tramadol douleur aiguë: 100mg puis 50-100mg/4-6h max 400mg/24h. Oxycodone libération normale: 5mg/4-6h max 40mg/j. Fentanyl transdermique: ne pas utiliser chez naïfs opioïdes.
-
-Interactions: buprénorphine/antagoniste → ↓ effet agoniste pur. Sédation excessive avec benzodiazépines/alcool. Syndrome sérotoninergique avec IMAO/ISRS (fentanyl, hydromorphone, oxycodone, péthidine, tapentadol, tramadol). Méthadone: torsades de pointes avec allongeurs QT. Tramadol/tapentadol: ↑ convulsions avec médicaments abaissant seuil convulsif. Codéine/tramadol: substrats CYP2D6. Buprénorphine/fentanyl: substrats CYP3A4. Méthadone: substrats CYP2B6 + CYP3A4.
-
-CI: dépression respiratoire aiguë, asthme aiguë, BPCO sévère, coma, ↑ pression intracrânienne, iléus paralytique. Codéine: CI métaboliseurs ultrarapides CYP2D6. Tramadol: CI épilepsie non contrôlée, insuffisance hépatique. Effets indésirables: constipation (sans tolérance), sédation (surtout début), euphorie, nausées/vomissements (premières semaines), hypotension orthostatique, dépression respiratoire, spasme pylore/voies biliaires/sphincter Oddi, hyperalgésie induite opioïdes, dépendance psychique/physique, allongement QT (méthadone).`
-  },
-  {
-    id: "ch9_antagonistes",
-    name: "Antagonistes des opioïdes",
-    icon: "🛡️",
-    content: `Naloxone, nalméfène, naltrexone: antagonistes récepteurs opioïdes centraux ET périphériques. Méthylnaltrexone: antagoniste récepteurs opioïdes périphériques uniquement (muqueuses GI). Méthylnaltrexone: traitement constipation liée aux opioïdes (soins palliatifs, réponse insuffisante laxatifs habituels) SANS modifier effet analgésique de l'opioïde. Nalméfène: utilisé dans l'alcoolisme. Naloxone: traitement intoxications aiguës aux opioïdes. Naltrexone: dépendance aux opioïdes après désintoxication initiale; aussi addiction alcool pour maintien abstinence. Usage hospitalier principalement. Interactions: manifestations sevrage ou perte analgésique si association opioïdes. CI méthylnaltrexone: obstruction ou risque obstruction GI. Effets indésirables méthylnaltrexone: douleurs abdominales, flatulence, diarrhée, nausées, vertiges; rarement perforation gastrique/intestinale.`
-  }
+  {id:"ch9_physio",name:"Physiopathologie douleur & fièvre",icon:"🧠",content:"Thermorégulation: thermorécepteurs centraux et périphériques, centre thermorégulateur hypothalamique (noyau préoptique). Baisse T°: sudation + vasodilatation. Hausse T°: frissons + vasoconstriction + adipocytes bruns. Intermédiaires: prostaglandines, interleukines. Douleur: expérience subjective avec composante affective. Nociception différente de douleur. EVA = échelle visuelle analogique. PAG (zone grise périaqueductale): voies descendantes inhibitrices, Reynolds 1969. Fibres C: douleur sourde diffuse brûlante. Fibres Adelta: douleur aiguë localisée. Douleur chronique: hyperalgésie, allodynie. Douleur neuropathique: AVC, SEP, neuropathie diabétique, zona, répond mal aux analgésiques classiques mais aux antidépresseurs/antiépileptiques. Récepteurs µ opioïdes: CI, amygdale, hypothalamus, PAG, RVM, corne dorsale. Médiateurs: BK, 5-HT, PGs, NGF, substance P, CGRP, GABA, NA."},
+  {id:"ch9_para",name:"Paracétamol",icon:"💊",content:"Paracétamol: analgésique-antipyrétique non narcotique. Inhibe synthèse PG dans SNC. Faible anti-inflammatoire, pas d'effets gastriques/plaquettaires. Inhibiteur faible COX-2. COX-3 dans SNC cible potentielle. AM404 active endocannabinoïdes/TRPV1. Demi-vie 2-4h, métabolisme hépatique. Toxicité >10g adulte, >150mg/kg enfant. NAPQI (CYP2E1) si glutathion épuisé → mort cellulaire. Antidote: acétylcystéine IV ou méthionine orale. Posologie adulte >= 50kg: max 4g/j (500mg-1g x4). Avec facteurs risque: max 3g/j. Interactions: alcool/barbituriques/phénytoïne/carbamazépine/isoniazide augmentent risque hépatique en surdosage. Flucloxacilline: risque AMTAE. CI: insuffisance rénale/hépatique sévère."},
+  {id:"ch9_ains",name:"AAS & autres analgésiques",icon:"🔬",content:"Aspirine: analgésique, antipyrétique, anti-inflammatoire (doses élevées 3-6g/j). Place limitée. Risque syndrome Reye enfants <12 ans infection virale (grippe, varicelle). Contre-indiqué grossesse. CI: hémorragie active, ulcère gastro-duodénal, enfants <12 ans infection virale. Métamizole: antipyrétique et spasmolytique. Agranulocytose = effet indésirable grave. Retiré marché certains pays. En Belgique: Novalgine. Syndromes Lyell et Stevens-Johnson. CI: hypotension, affections hématologiques. Néfopam: mécanisme inconnu, uniquement analgésique. CI: enfants, convulsions, IMAO, insuffisance rénale."},
+  {id:"ch9_approche",name:"Approche médicamenteuse",icon:"🏥",content:"Fièvre: traiter cause, pas toujours nécessaire. Paracétamol = 1er choix. Ibuprofène déconseillé si déshydratation/varicelle/zona. Douleur aiguë: étape 1 paracétamol, étape 2 AINS courte durée, étape 3 opioïde faible (codéine/tramadol), dernier recours opioïde puissant. Douleur chronique: approche pluridisciplinaire, schéma fixe. Opioïdes puissants place très limitée hors cancer. Douleur neuropathique chronique: antidépresseurs (duloxétine), antiépileptiques (carbamazépine, gabapentine, prégabaline). Echelle OMS soins palliatifs: Palier I non opioïde, Palier II opioïde faible, Palier III opioïde fort oral/transdermique, Palier IV opioïde fort parentéral."},
+  {id:"ch9_opio",name:"Les opioïdes",icon:"⚗️",content:"Morphine = composé référence dérivé phénanthrène. Structure déterminée 1902. Récepteurs: µ (MOPr) euphorie+++/dépression respiratoire+++/dépendance physique+++, κ (KOPr) dysphorie/hallucinations+++, δ (DOPr) analgésie spinale++, ORL1 catatonie++. Opioïdes faibles: codéine, tramadol. Puissants: morphine, fentanyl, oxycodone, méthadone, buprénorphine. Buprénorphine = agoniste partiel. Tolérance = besoin doses croissantes. Dépendance physique + psychique. Constipation: pas de tolérance. Effets: analgésie, euphorie, dépression respiratoire, myosis, constipation, nausées. Interactions: syndrome sérotoninergique avec ISRS/IMAO (tramadol, fentanyl etc). Méthadone: allongement QT. Codéine/tramadol: substrats CYP2D6. CI: dépression respiratoire aiguë, asthme aiguë, BPCO sévère."},
+  {id:"ch9_antago",name:"Antagonistes des opioïdes",icon:"🛡️",content:"Naloxone: antagoniste central+périphérique, intoxications aiguës opioïdes. Naltrexone: dépendance opioïdes après désintoxication, aussi alcoolisme. Nalméfène: alcoolisme. Méthylnaltrexone: antagoniste périphérique uniquement, constipation liée aux opioïdes sans modifier analgésie centrale. CI méthylnaltrexone: obstruction GI. Effets méthylnaltrexone: douleurs abdominales, diarrhée, nausées, rarement perforation GI."}
 ];
 
-// ===================== STATE =====================
-let currentMode = '';
+const Q_TYPES = ["QCM","Question ouverte","Cas clinique"];
 let currentChapters = [];
 let currentQIndex = 0;
 let scores = [];
 let questions = [];
 
-// ===================== INIT =====================
-function init() {
-  const list = document.getElementById('chapters-list');
-  CHAPTERS.forEach(ch => {
-    const div = document.createElement('div');
-    div.className = 'chapter-chip';
-    div.innerHTML = `<span class="ch-icon">${ch.icon}</span><span class="ch-name">${ch.name}</span>`;
-    div.onclick = () => { startQuiz([ch]); };
-    list.appendChild(div);
+function showScreen(id){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));document.getElementById("screen-"+id).classList.add("active");}
+
+function init(){
+  ["chapters-preview","chapter-select-grid"].forEach(containerId=>{
+    const container = document.getElementById(containerId);
+    CHAPTERS.forEach(ch=>{
+      const div=document.createElement("div");
+      div.className="chapter-chip";
+      div.innerHTML=`<span class="ch-icon">${ch.icon}</span><span class="ch-name">${ch.name}</span>`;
+      div.onclick=()=>startQuiz([ch]);
+      container.appendChild(div);
+    });
   });
 }
 
-// ===================== SCREENS =====================
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById('screen-' + id).classList.add('active');
+function startExamMode(){startQuiz(CHAPTERS);}
+function retryQuiz(){startQuiz(currentChapters);}
+
+function startQuiz(chaps){
+  currentChapters=chaps;currentQIndex=0;scores=[];questions=[];
+  showScreen("quiz");loadQuestion();
 }
 
-function startChapterMode() {
-  const grid = document.getElementById('chapter-select-grid');
-  grid.innerHTML = '';
-  CHAPTERS.forEach(ch => {
-    const div = document.createElement('div');
-    div.className = 'chapter-chip';
-    div.innerHTML = `<span class="ch-icon">${ch.icon}</span><span class="ch-name">${ch.name}</span>`;
-    div.onclick = () => startQuiz([ch]);
-    grid.appendChild(div);
-  });
-  showScreen('chapters');
-}
-
-function startExamMode() {
-  startQuiz(CHAPTERS);
-}
-
-function startQuiz(chaps) {
-  currentChapters = chaps;
-  currentQIndex = 0;
-  scores = [];
-  questions = [];
-  showScreen('quiz');
-  loadQuestion();
-}
-
-function retryQuiz() {
-  startQuiz(currentChapters);
-}
-
-// ===================== QUESTION TYPES =====================
-const Q_TYPES = ['QCM', 'Question ouverte', 'Cas clinique'];
-
-async function loadQuestion() {
-  setLoading(true, 'Génération de la question...');
+async function loadQuestion(){
+  setLoading(true,"Génération de la question...");
   clearQuestion();
+  const chap=currentChapters[Math.floor(Math.random()*currentChapters.length)];
+  const qtype=Q_TYPES[Math.floor(Math.random()*Q_TYPES.length)];
+  document.getElementById("q-num-label").textContent=`Question ${currentQIndex+1}`;
+  document.getElementById("prog-fill").style.width=`${Math.min(5+currentQIndex*10,95)}%`;
+  document.getElementById("q-chap-badge").textContent=chap.name;
+  const tb=document.getElementById("q-type-badge");
+  tb.textContent=qtype;
+  tb.className="badge "+(qtype==="QCM"?"badge-qcm":qtype==="Cas clinique"?"badge-case":"badge-open");
 
-  const chap = currentChapters[Math.floor(Math.random() * currentChapters.length)];
-  const qtype = Q_TYPES[Math.floor(Math.random() * Q_TYPES.length)];
-
-  document.getElementById('q-num-label').textContent = `Question ${currentQIndex + 1}`;
-  document.getElementById('prog-fill').style.width = `${Math.min(5 + currentQIndex * 15, 95)}%`;
-  document.getElementById('q-chap-badge').textContent = chap.name;
-
-  const typeBadge = document.getElementById('q-type-badge');
-  typeBadge.textContent = qtype;
-  typeBadge.className = 'badge ' + (qtype === 'QCM' ? 'badge-qcm' : qtype === 'Cas clinique' ? 'badge-case' : 'badge-open');
-
-  let prompt = '';
-  if (qtype === 'QCM') {
-    prompt = `Tu es un professeur de pharmacologie. Génère une question QCM sur le chapitre "${chap.name}".
-Voici le contenu du chapitre:
-${chap.content}
-
-Réponds UNIQUEMENT en JSON valide, sans backticks, sans texte autour:
-{"question":"...","options":["A) ...","B) ...","C) ...","D) ..."],"correct":"A","explanation":"explication pédagogique en 2-3 phrases"}`;
-  } else if (qtype === 'Question ouverte') {
-    prompt = `Tu es un professeur de pharmacologie. Génère une question ouverte sur le chapitre "${chap.name}".
-Voici le contenu du chapitre:
-${chap.content}
-
-Réponds UNIQUEMENT en JSON valide, sans backticks, sans texte autour:
-{"question":"...","expectedPoints":["point clé 1","point clé 2","point clé 3"]}`;
+  let prompt="";
+  if(qtype==="QCM"){
+    prompt=`Tu es professeur de pharmacologie. Génère une QCM sur "${chap.name}". Cours: ${chap.content}
+Réponds UNIQUEMENT en JSON valide sans backticks:
+{"question":"...","options":["A) ...","B) ...","C) ...","D) ..."],"correct":"A","explanation":"..."}`;
+  } else if(qtype==="Question ouverte"){
+    prompt=`Tu es professeur de pharmacologie. Génère une question ouverte sur "${chap.name}". Cours: ${chap.content}
+Réponds UNIQUEMENT en JSON valide sans backticks:
+{"question":"...","expectedPoints":["point1","point2","point3"]}`;
   } else {
-    prompt = `Tu es un professeur de pharmacologie. Génère un cas clinique court sur le chapitre "${chap.name}".
-Voici le contenu du chapitre:
-${chap.content}
-
-Réponds UNIQUEMENT en JSON valide, sans backticks, sans texte autour:
-{"scenario":"description cas clinique en 2-3 phrases","question":"question à l'étudiant","expectedPoints":["point clé 1","point clé 2"]}`;
+    prompt=`Tu es professeur de pharmacologie. Génère un cas clinique sur "${chap.name}". Cours: ${chap.content}
+Réponds UNIQUEMENT en JSON valide sans backticks:
+{"scenario":"...","question":"...","expectedPoints":["point1","point2"]}`;
   }
 
-  try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY, 'anthropic-version': '2023-06-01' },
-      body: JSON.stringify({ model: MODEL, max_tokens: 1000, messages: [{ role: 'user', content: prompt }] })
+  try{
+    const resp=await fetch("/.netlify/functions/claude",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({messages:[{role:"user",content:prompt}]})
     });
-    const data = await resp.json();
-    const raw = data.content.map(b => b.text || '').join('');
-    const clean = raw.replace(/```json|```/g, '').trim();
-    const q = JSON.parse(clean);
-    q.type = qtype;
-    q.chapter = chap;
+    const data=await resp.json();
+    const raw=data.content.map(b=>b.text||"").join("");
+    const q=JSON.parse(raw.replace(/```json|```/g,"").trim());
+    q.type=qtype;q.chapter=chap;
     questions.push(q);
     setLoading(false);
     renderQuestion(q);
-  } catch(e) {
+  } catch(e){
     setLoading(false);
-    document.getElementById('q-text').textContent = "Erreur de génération. Vérifie ta connexion internet et ta clé API.";
+    document.getElementById("q-text").textContent="Erreur de génération. Vérifie ta connexion.";
   }
 }
 
-function renderQuestion(q) {
-  if (q.type === 'Cas clinique' && q.scenario) {
-    const sc = document.getElementById('q-scenario');
-    sc.textContent = q.scenario;
-    sc.classList.remove('hidden');
-  }
-  document.getElementById('q-text').textContent = q.question;
+function clearQuestion(){
+  document.getElementById("q-scenario").style.display="none";
+  document.getElementById("q-text").textContent="";
+  document.getElementById("q-options").innerHTML="";
+  document.getElementById("q-textarea").style.display="none";
+  document.getElementById("q-textarea").disabled=false;
+  document.getElementById("q-feedback").className="feedback";
+  document.getElementById("q-feedback").innerHTML="";
+  document.getElementById("q-actions").innerHTML="";
+}
 
-  if (q.type === 'QCM') {
-    const opts = document.getElementById('q-options');
-    q.options.forEach((opt, i) => {
-      const btn = document.createElement('button');
-      btn.className = 'option-btn';
-      btn.textContent = opt;
-      btn.onclick = () => selectOption(btn, i, q);
+function renderQuestion(q){
+  if(q.type==="Cas clinique"&&q.scenario){
+    const sc=document.getElementById("q-scenario");
+    sc.textContent=q.scenario;sc.style.display="block";
+  }
+  document.getElementById("q-text").textContent=q.question;
+  if(q.type==="QCM"){
+    const opts=document.getElementById("q-options");
+    q.options.forEach((opt,i)=>{
+      const btn=document.createElement("button");
+      btn.className="option-btn";btn.textContent=opt;
+      btn.onclick=()=>selectOption(btn,i,q);
       opts.appendChild(btn);
     });
   } else {
-    document.getElementById('q-textarea').classList.remove('hidden');
-    document.getElementById('q-textarea').value = '';
-    document.getElementById('q-actions').innerHTML = `<button class="btn-primary" onclick="submitOpen()">Corriger ma réponse →</button>`;
+    document.getElementById("q-textarea").style.display="block";
+    document.getElementById("q-actions").innerHTML=`<button class="btn-primary" onclick="submitOpen()">Corriger ma réponse →</button>`;
   }
 }
 
-function clearQuestion() {
-  document.getElementById('q-scenario').classList.add('hidden');
-  document.getElementById('q-scenario').textContent = '';
-  document.getElementById('q-text').textContent = '';
-  document.getElementById('q-options').innerHTML = '';
-  document.getElementById('q-textarea').classList.add('hidden');
-  document.getElementById('q-textarea').disabled = false;
-  document.getElementById('q-feedback').className = 'feedback';
-  document.getElementById('q-feedback').innerHTML = '';
-  document.getElementById('q-actions').innerHTML = '';
-}
-
-function selectOption(btn, idx, q) {
-  document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
-  const correctIdx = ['A','B','C','D'].indexOf(q.correct);
-  const isCorrect = idx === correctIdx;
-  if (isCorrect) {
-    btn.classList.add('correct');
-    scores.push(1);
-    showFeedback('good', '✓ Correct ! ' + (q.explanation || ''));
-  } else {
-    btn.classList.add('wrong');
-    document.querySelectorAll('.option-btn')[correctIdx]?.classList.add('correct');
-    scores.push(0);
-    showFeedback('bad', '✗ Incorrect. Bonne réponse : ' + q.options[correctIdx] + '. ' + (q.explanation || ''));
-  }
+function selectOption(btn,idx,q){
+  document.querySelectorAll(".option-btn").forEach(b=>b.disabled=true);
+  const ci=["A","B","C","D"].indexOf(q.correct);
+  if(idx===ci){btn.classList.add("correct");scores.push(1);showFeedback("good","✓ Correct ! "+q.explanation);}
+  else{btn.classList.add("wrong");document.querySelectorAll(".option-btn")[ci].classList.add("correct");scores.push(0);showFeedback("bad","✗ Incorrect. Bonne réponse: "+q.options[ci]+". "+q.explanation);}
   showNextActions();
 }
 
-async function submitOpen() {
-  const answer = document.getElementById('q-textarea').value.trim();
-  if (!answer) return;
-  document.getElementById('q-textarea').disabled = true;
-  document.getElementById('q-actions').innerHTML = '';
-  setLoading(true, 'Correction en cours...');
-
-  const q = questions[questions.length - 1];
-  try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY, 'anthropic-version': '2023-06-01' },
-      body: JSON.stringify({
-        model: MODEL, max_tokens: 1000,
-        messages: [{ role: 'user', content: `Tu es un professeur de pharmacologie bienveillant. Évalue cette réponse.
+async function submitOpen(){
+  const answer=document.getElementById("q-textarea").value.trim();
+  if(!answer)return;
+  document.getElementById("q-textarea").disabled=true;
+  document.getElementById("q-actions").innerHTML="";
+  setLoading(true,"Correction en cours...");
+  const q=questions[questions.length-1];
+  try{
+    const resp=await fetch("/.netlify/functions/claude",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({messages:[{role:"user",content:`Évalue cette réponse de pharmacologie.
 Question: ${q.question}
-Points attendus: ${JSON.stringify(q.expectedPoints || [])}
-Réponse étudiant: ${answer}
-
-Réponds UNIQUEMENT en JSON valide sans backticks:
-{"score":"bon"|"partiel"|"insuffisant","pointsManquants":["..."],"feedback":"commentaire bienveillant 2-3 phrases"}` }]
-      })
+Points attendus: ${JSON.stringify(q.expectedPoints||[])}
+Réponse: ${answer}
+Réponds UNIQUEMENT en JSON sans backticks:
+{"score":"bon"|"partiel"|"insuffisant","pointsManquants":["..."],"feedback":"..."}`}]})
     });
-    const data = await resp.json();
-    const raw = data.content.map(b => b.text || '').join('');
-    const ev = JSON.parse(raw.replace(/```json|```/g, '').trim());
-    scores.push(ev.score === 'bon' ? 1 : ev.score === 'partiel' ? 0.5 : 0);
-    const icon = ev.score === 'bon' ? '✓' : ev.score === 'partiel' ? '◑' : '✗';
-    let fb = icon + ' ' + ev.feedback;
-    if (ev.pointsManquants?.length) fb += '<br><br><strong>À revoir :</strong> ' + ev.pointsManquants.join(', ');
-    const level = ev.score === 'bon' ? 'good' : ev.score === 'partiel' ? 'partial' : 'bad';
-    showFeedback(level, fb);
-  } catch(e) {
-    scores.push(0.5);
-    showFeedback('partial', 'Réponse enregistrée. Consulte ton cours pour vérifier tes points clés.');
-  }
-  setLoading(false);
-  showNextActions();
+    const data=await resp.json();
+    const ev=JSON.parse(data.content.map(b=>b.text||"").join("").replace(/```json|```/g,"").trim());
+    scores.push(ev.score==="bon"?1:ev.score==="partiel"?0.5:0);
+    const icon=ev.score==="bon"?"✓":ev.score==="partiel"?"◑":"✗";
+    const level=ev.score==="bon"?"good":ev.score==="partiel"?"partial":"bad";
+    let fb=icon+" "+ev.feedback;
+    if(ev.pointsManquants&&ev.pointsManquants.length)fb+="<br><br><strong>À revoir:</strong> "+ev.pointsManquants.join(", ");
+    showFeedback(level,fb);
+  }catch(e){scores.push(0.5);showFeedback("partial","Réponse enregistrée.");}
+  setLoading(false);showNextActions();
 }
 
-function showFeedback(level, html) {
-  const fb = document.getElementById('q-feedback');
-  fb.className = 'feedback show ' + level;
-  fb.innerHTML = html;
-}
+function showFeedback(level,html){const fb=document.getElementById("q-feedback");fb.className="feedback show "+level;fb.innerHTML=html;}
 
-function showNextActions() {
-  const canFinish = scores.length >= 5;
-  document.getElementById('q-actions').innerHTML = `
+function showNextActions(){
+  const canFinish=scores.length>=5;
+  document.getElementById("q-actions").innerHTML=`
     <button class="btn-primary" onclick="nextQuestion()">Question suivante →</button>
-    ${canFinish ? '<button class="btn-ghost" onclick="showResults()">Voir les résultats</button>' : ''}
+    ${canFinish?"<button class='btn-ghost' onclick='showResults()'>Voir les résultats</button>":""}
   `;
 }
 
-function nextQuestion() {
-  currentQIndex++;
-  loadQuestion();
+function nextQuestion(){currentQIndex++;loadQuestion();}
+
+function setLoading(show,text=""){
+  const el=document.getElementById("q-loading");
+  el.className="loading"+(show?" show":"");
+  if(text)document.getElementById("q-loading-text").textContent=text;
 }
 
-function setLoading(show, text = '') {
-  const el = document.getElementById('q-loading');
-  el.className = 'loading' + (show ? ' show' : '');
-  if (text) document.getElementById('q-loading-text').textContent = text;
+function showResults(){
+  const total=scores.length,sum=scores.reduce((a,b)=>a+b,0),pct=Math.round((sum/total)*100);
+  document.getElementById("res-pct").textContent=pct+"%";
+  document.getElementById("res-title").textContent=pct>=80?"🎉 Excellent !":pct>=60?"👍 Bien joué !":"📚 Continue à réviser !";
+  document.getElementById("res-sub").textContent=`${Math.round(sum*2)/2} / ${total} bonnes réponses`;
+  document.getElementById("res-stats").innerHTML=`<p class="section-label" style="margin-bottom:1rem;">Résumé</p><div class="stat-row"><span style="color:var(--muted);">Questions répondues</span><span style="font-weight:500;">${total}</span></div><div class="stat-row"><span style="color:var(--muted);">Bonnes réponses</span><span style="font-weight:500;color:var(--green);">${Math.round(sum*2)/2}</span></div><div class="stat-row"><span style="color:var(--muted);">Mauvaises réponses</span><span style="font-weight:500;color:var(--red);">${total-Math.round(sum*2)/2}</span></div>`;
+  showScreen("results");
 }
 
-// ===================== RESULTS =====================
-function showResults() {
-  const total = scores.length;
-  const sum = scores.reduce((a, b) => a + b, 0);
-  const pct = Math.round((sum / total) * 100);
-
-  document.getElementById('res-pct').textContent = pct + '%';
-  document.getElementById('res-title').textContent = pct >= 80 ? '🎉 Excellent !' : pct >= 60 ? '👍 Bien joué !' : '📚 Continue à réviser !';
-  document.getElementById('res-sub').textContent = `${Math.round(sum * 2) / 2} / ${total} questions correctes`;
-
-  const byType = {};
-  questions.forEach((q, i) => {
-    if (!byType[q.type]) byType[q.type] = { total: 0, sum: 0 };
-    byType[q.type].total++;
-    byType[q.type].sum += (scores[i] || 0);
-  });
-
-  let html = '<p class="section-label" style="margin-bottom:1rem;">Détail par type</p>';
-  Object.entries(byType).forEach(([type, s]) => {
-    const p = Math.round((s.sum / s.total) * 100);
-    const color = p >= 70 ? 'var(--green)' : p >= 50 ? 'var(--amber)' : 'var(--red)';
-    html += `<div class="stat-row"><span style="color:var(--muted);">${type}</span><span style="font-weight:500;color:${color};">${p}%</span></div>`;
-  });
-  document.getElementById('res-stats').innerHTML = html;
-  showScreen('results');
-}
-
-if (API_KEY) {
-  showScreen("mode");
-} else {
-  showScreen("apikey");
-}
 init();
 </script>
 </body>
