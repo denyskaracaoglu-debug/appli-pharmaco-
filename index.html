@@ -24,11 +24,6 @@ body::before{content:"";position:fixed;top:-200px;right:-200px;width:600px;heigh
 .mode-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
 .m-title{font-size:15px;font-weight:500;}
 .m-desc{font-size:12px;color:var(--muted);margin-top:2px;}
-.chapter-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-top:1rem;}
-.chapter-chip{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:0.9rem 1rem;cursor:pointer;transition:all 0.2s;text-align:left;}
-.chapter-chip:hover{border-color:var(--accent);background:rgba(124,106,247,0.1);transform:translateY(-2px);}
-.ch-icon{font-size:22px;margin-bottom:6px;display:block;}
-.ch-name{font-size:13px;font-weight:500;color:var(--text);line-height:1.4;}
 .progress-track{background:var(--surface2);border-radius:99px;height:4px;margin-bottom:1.5rem;overflow:hidden;}
 .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:99px;transition:width 0.4s ease;}
 .q-counter{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;}
@@ -67,6 +62,19 @@ textarea:focus{outline:none;border-color:var(--accent);}
 .loading.show{display:flex;}
 .spinner{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.7s linear infinite;flex-shrink:0;}
 @keyframes spin{to{transform:rotate(360deg);}}
+
+/* Sous-thème chips */
+.theme-row{display:flex;align-items:center;gap:12px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:0.9rem 1rem;margin-bottom:8px;cursor:pointer;transition:all 0.2s;}
+.theme-row:hover{border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(3px);}
+.theme-row.selected{border-color:var(--accent);background:rgba(124,106,247,0.15);}
+.theme-row-icon{font-size:18px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;background:rgba(124,106,247,0.12);border-radius:8px;flex-shrink:0;}
+.theme-row-name{font-size:14px;font-weight:500;flex:1;}
+.theme-row-check{color:var(--accent);font-size:16px;display:none;}
+.theme-row.selected .theme-row-check{display:block;}
+
+/* Breadcrumb */
+.breadcrumb{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);margin-bottom:1rem;flex-wrap:wrap;}
+.breadcrumb span{color:var(--text);}
 </style>
 </head>
 <body>
@@ -76,35 +84,55 @@ textarea:focus{outline:none;border-color:var(--accent);}
     <div><div class="app-title">Quiz Pharmacologie</div><div class="app-sub">Révision intelligente par IA</div></div>
   </div>
 
-  <div id="screen-mode" class="screen active">
-    <div class="card">
-      <p class="section-label">Comment veux-tu réviser ?</p>
-      <button class="mode-btn" onclick="startExamMode()">
-        <div class="mode-icon" style="background:rgba(251,191,36,0.15);">🎯</div>
-        <div><div class="m-title">Mode examen</div><div class="m-desc">Mélange de tous les chapitres</div></div>
-      </button>
-      <button class="mode-btn" onclick="showScreen('chapters')">
-        <div class="mode-icon" style="background:rgba(124,106,247,0.15);">📖</div>
-        <div><div class="m-title">Par chapitre</div><div class="m-desc">Travaille un chapitre précis</div></div>
-      </button>
-    </div>
-    <div class="card">
-      <p class="section-label">Chapitres disponibles</p>
-      <div class="chapter-grid" id="chapters-preview"></div>
-    </div>
-  </div>
-
-  <div id="screen-chapters" class="screen">
-    <button class="btn-back" onclick="showScreen('mode')" style="margin-bottom:1rem;">← Retour</button>
+  <!-- ÉCRAN 1 : Accueil — choisir le chapitre -->
+  <div id="screen-home" class="screen active">
     <div class="card">
       <p class="section-label">Choisir un chapitre</p>
-      <div class="chapter-grid" id="chapter-select-grid"></div>
+      <button class="mode-btn" onclick="openChapter('ch9')">
+        <div class="mode-icon" style="background:rgba(251,191,36,0.15);">💊</div>
+        <div><div class="m-title">Chapitre 9</div><div class="m-desc">Douleur, fièvre & analgésiques</div></div>
+      </button>
+      <button class="mode-btn" onclick="openChapter('ch11')">
+        <div class="mode-icon" style="background:rgba(124,106,247,0.15);">🧠</div>
+        <div><div class="m-title">Chapitre 11</div><div class="m-desc">Le système nerveux</div></div>
+      </button>
+    </div>
+    <div class="card">
+      <p class="section-label">Ou réviser tout</p>
+      <button class="mode-btn" onclick="startQuiz(ALL_CHAPTERS)">
+        <div class="mode-icon" style="background:rgba(52,211,153,0.15);">🎯</div>
+        <div><div class="m-title">Mode examen global</div><div class="m-desc">Tous les chapitres mélangés</div></div>
+      </button>
     </div>
   </div>
 
+  <!-- ÉCRAN 2 : Sous-thèmes d'un chapitre -->
+  <div id="screen-themes" class="screen">
+    <button class="btn-back" onclick="showScreen('home')" style="margin-bottom:1rem;">← Retour</button>
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:1.25rem;">
+        <div id="th-chapter-icon" style="font-size:26px;width:46px;height:46px;display:flex;align-items:center;justify-content:center;background:rgba(124,106,247,0.12);border-radius:12px;flex-shrink:0;"></div>
+        <div>
+          <div id="th-chapter-title" style="font-family:Syne,sans-serif;font-size:16px;font-weight:700;"></div>
+          <div id="th-chapter-sub" style="font-size:12px;color:var(--muted);margin-top:2px;"></div>
+        </div>
+      </div>
+      <p class="section-label">Mode</p>
+      <button class="mode-btn" id="btn-exam-all" onclick="examAllThemes()">
+        <div class="mode-icon" style="background:rgba(251,191,36,0.15);">🎯</div>
+        <div><div class="m-title">Mode examen</div><div class="m-desc">Tous les sous-thèmes mélangés</div></div>
+      </button>
+    </div>
+    <div class="card">
+      <p class="section-label">Ou choisir un sous-thème</p>
+      <div id="theme-list"></div>
+    </div>
+  </div>
+
+  <!-- ÉCRAN QUIZ -->
   <div id="screen-quiz" class="screen">
     <div class="q-counter">
-      <button class="btn-back" onclick="showScreen('mode')">✕ Quitter</button>
+      <button class="btn-back" onclick="showScreen('home')">✕ Quitter</button>
       <span class="q-num" id="q-num-label">Question 1</span>
     </div>
     <div class="progress-track"><div class="progress-fill" id="prog-fill" style="width:5%"></div></div>
@@ -123,6 +151,7 @@ textarea:focus{outline:none;border-color:var(--accent);}
     <div id="q-actions"></div>
   </div>
 
+  <!-- ÉCRAN RÉSULTATS -->
   <div id="screen-results" class="screen">
     <div class="card" style="text-align:center;padding:2rem 1.5rem;">
       <div class="score-ring"><span class="score-num" id="res-pct">0%</span><span class="score-lbl">Score</span></div>
@@ -131,92 +160,161 @@ textarea:focus{outline:none;border-color:var(--accent);}
     </div>
     <div class="card" id="res-stats"></div>
     <button class="btn-primary" onclick="retryQuiz()">🔄 Nouveau quiz</button>
-    <button class="btn-ghost" onclick="showScreen('mode')">Changer de mode</button>
+    <button class="btn-ghost" onclick="showScreen('home')">Changer de chapitre</button>
   </div>
 </div>
 
 <script>
-const CHAPTERS = [
-  {id:"ch9_physio",name:"Physiopathologie douleur & fièvre",icon:"🧠",content:"Thermorégulation: thermorécepteurs centraux et périphériques, centre thermorégulateur hypothalamique (noyau préoptique). Baisse T°: sudation + vasodilatation. Hausse T°: frissons + vasoconstriction + adipocytes bruns. Intermédiaires: prostaglandines, interleukines. Douleur: expérience subjective avec composante affective. Nociception différente de douleur. EVA = échelle visuelle analogique. PAG (zone grise périaqueductale): voies descendantes inhibitrices, Reynolds 1969. Fibres C: douleur sourde diffuse brûlante. Fibres Adelta: douleur aiguë localisée. Douleur chronique: hyperalgésie, allodynie. Douleur neuropathique: AVC, SEP, neuropathie diabétique, zona, répond mal aux analgésiques classiques mais aux antidépresseurs/antiépileptiques. Récepteurs µ opioïdes: CI, amygdale, hypothalamus, PAG, RVM, corne dorsale. Médiateurs: BK, 5-HT, PGs, NGF, substance P, CGRP, GABA, NA."},
-  {id:"ch9_para",name:"Paracétamol",icon:"💊",content:"Paracétamol: analgésique-antipyrétique non narcotique. Inhibe synthèse PG dans SNC. Faible anti-inflammatoire, pas d'effets gastriques/plaquettaires. Inhibiteur faible COX-2. COX-3 dans SNC cible potentielle. AM404 active endocannabinoïdes/TRPV1. Demi-vie 2-4h, métabolisme hépatique. Toxicité >10g adulte, >150mg/kg enfant. NAPQI (CYP2E1) si glutathion épuisé → mort cellulaire. Antidote: acétylcystéine IV ou méthionine orale. Posologie adulte >= 50kg: max 4g/j (500mg-1g x4). Avec facteurs risque: max 3g/j. Interactions: alcool/barbituriques/phénytoïne/carbamazépine/isoniazide augmentent risque hépatique en surdosage. Flucloxacilline: risque AMTAE. CI: insuffisance rénale/hépatique sévère."},
-  {id:"ch9_ains",name:"AAS & autres analgésiques",icon:"🔬",content:"Aspirine: analgésique, antipyrétique, anti-inflammatoire (doses élevées 3-6g/j). Place limitée. Risque syndrome Reye enfants <12 ans infection virale (grippe, varicelle). Contre-indiqué grossesse. CI: hémorragie active, ulcère gastro-duodénal, enfants <12 ans infection virale. Métamizole: antipyrétique et spasmolytique. Agranulocytose = effet indésirable grave. Retiré marché certains pays. En Belgique: Novalgine. Syndromes Lyell et Stevens-Johnson. CI: hypotension, affections hématologiques. Néfopam: mécanisme inconnu, uniquement analgésique. CI: enfants, convulsions, IMAO, insuffisance rénale."},
-  {id:"ch9_approche",name:"Approche médicamenteuse",icon:"🏥",content:"Fièvre: traiter cause, pas toujours nécessaire. Paracétamol = 1er choix. Ibuprofène déconseillé si déshydratation/varicelle/zona. Douleur aiguë: étape 1 paracétamol, étape 2 AINS courte durée, étape 3 opioïde faible (codéine/tramadol), dernier recours opioïde puissant. Douleur chronique: approche pluridisciplinaire, schéma fixe. Opioïdes puissants place très limitée hors cancer. Douleur neuropathique chronique: antidépresseurs (duloxétine), antiépileptiques (carbamazépine, gabapentine, prégabaline). Echelle OMS soins palliatifs: Palier I non opioïde, Palier II opioïde faible, Palier III opioïde fort oral/transdermique, Palier IV opioïde fort parentéral."},
-  {id:"ch9_opio",name:"Les opioïdes",icon:"⚗️",content:"Morphine = composé référence dérivé phénanthrène. Structure déterminée 1902. Récepteurs: µ (MOPr) euphorie+++/dépression respiratoire+++/dépendance physique+++, κ (KOPr) dysphorie/hallucinations+++, δ (DOPr) analgésie spinale++, ORL1 catatonie++. Opioïdes faibles: codéine, tramadol. Puissants: morphine, fentanyl, oxycodone, méthadone, buprénorphine. Buprénorphine = agoniste partiel. Tolérance = besoin doses croissantes. Dépendance physique + psychique. Constipation: pas de tolérance. Effets: analgésie, euphorie, dépression respiratoire, myosis, constipation, nausées. Interactions: syndrome sérotoninergique avec ISRS/IMAO (tramadol, fentanyl etc). Méthadone: allongement QT. Codéine/tramadol: substrats CYP2D6. CI: dépression respiratoire aiguë, asthme aiguë, BPCO sévère."},
-  {id:"ch9_antago",name:"Antagonistes des opioïdes",icon:"🛡️",content:"Naloxone: antagoniste central+périphérique, intoxications aiguës opioïdes. Naltrexone: dépendance opioïdes après désintoxication, aussi alcoolisme. Nalméfène: alcoolisme. Méthylnaltrexone: antagoniste périphérique uniquement, constipation liée aux opioïdes sans modifier analgésie centrale. CI méthylnaltrexone: obstruction GI. Effets méthylnaltrexone: douleurs abdominales, diarrhée, nausées, rarement perforation GI."}
+// ──────────────────────────────────────────────
+// DONNÉES
+// ──────────────────────────────────────────────
+const BOOK = {
+  ch9: {
+    title: "Chapitre 9",
+    subtitle: "Douleur, fièvre & analgésiques",
+    icon: "💊",
+    themes: [
+      {name:"Physiopathologie douleur & fièvre", icon:"🧠", content:"Thermorégulation: thermorécepteurs centraux et périphériques, centre thermorégulateur hypothalamique (noyau préoptique). Baisse T°: sudation + vasodilatation. Hausse T°: frissons + vasoconstriction + adipocytes bruns. Intermédiaires: prostaglandines, interleukines. Douleur: expérience subjective avec composante affective. Nociception différente de douleur. EVA = échelle visuelle analogique. PAG (zone grise périaqueductale): voies descendantes inhibitrices, Reynolds 1969. Fibres C: douleur sourde diffuse brûlante. Fibres Adelta: douleur aiguë localisée. Douleur chronique: hyperalgésie, allodynie. Douleur neuropathique: AVC, SEP, neuropathie diabétique, zona, répond mal aux analgésiques classiques mais aux antidépresseurs/antiépileptiques. Récepteurs µ opioïdes: CI, amygdale, hypothalamus, PAG, RVM, corne dorsale. Médiateurs: BK, 5-HT, PGs, NGF, substance P, CGRP, GABA, NA."},
+      {name:"Paracétamol", icon:"💊", content:"Paracétamol: analgésique-antipyrétique non narcotique. Inhibe synthèse PG dans SNC. Faible anti-inflammatoire, pas d'effets gastriques/plaquettaires. Inhibiteur faible COX-2. COX-3 dans SNC cible potentielle. AM404 active endocannabinoïdes/TRPV1. Demi-vie 2-4h, métabolisme hépatique. Toxicité >10g adulte, >150mg/kg enfant. NAPQI (CYP2E1) si glutathion épuisé → mort cellulaire. Antidote: acétylcystéine IV ou méthionine orale. Posologie adulte >= 50kg: max 4g/j (500mg-1g x4). Avec facteurs risque: max 3g/j. Interactions: alcool/barbituriques/phénytoïne/carbamazépine/isoniazide augmentent risque hépatique en surdosage. Flucloxacilline: risque AMTAE. CI: insuffisance rénale/hépatique sévère."},
+      {name:"AAS & autres analgésiques", icon:"🔬", content:"Aspirine: analgésique, antipyrétique, anti-inflammatoire (doses élevées 3-6g/j). Place limitée. Risque syndrome Reye enfants <12 ans infection virale (grippe, varicelle). Contre-indiqué grossesse. CI: hémorragie active, ulcère gastro-duodénal, enfants <12 ans infection virale. Métamizole: antipyrétique et spasmolytique. Agranulocytose = effet indésirable grave. Retiré marché certains pays. En Belgique: Novalgine. Syndromes Lyell et Stevens-Johnson. CI: hypotension, affections hématologiques. Néfopam: mécanisme inconnu, uniquement analgésique. CI: enfants, convulsions, IMAO, insuffisance rénale."},
+      {name:"Approche médicamenteuse", icon:"🏥", content:"Fièvre: traiter cause, pas toujours nécessaire. Paracétamol = 1er choix. Ibuprofène déconseillé si déshydratation/varicelle/zona. Douleur aiguë: étape 1 paracétamol, étape 2 AINS courte durée, étape 3 opioïde faible (codéine/tramadol), dernier recours opioïde puissant. Douleur chronique: approche pluridisciplinaire, schéma fixe. Opioïdes puissants place très limitée hors cancer. Douleur neuropathique chronique: antidépresseurs (duloxétine), antiépileptiques (carbamazépine, gabapentine, prégabaline). Echelle OMS soins palliatifs: Palier I non opioïde, Palier II opioïde faible, Palier III opioïde fort oral/transdermique, Palier IV opioïde fort parentéral."},
+      {name:"Les opioïdes", icon:"⚗️", content:"Morphine = composé référence dérivé phénanthrène. Structure déterminée 1902. Récepteurs: µ (MOPr) euphorie+++/dépression respiratoire+++/dépendance physique+++, κ (KOPr) dysphorie/hallucinations+++, δ (DOPr) analgésie spinale++, ORL1 catatonie++. Opioïdes faibles: codéine, tramadol. Puissants: morphine, fentanyl, oxycodone, méthadone, buprénorphine. Buprénorphine = agoniste partiel. Tolérance = besoin doses croissantes. Dépendance physique + psychique. Constipation: pas de tolérance. Effets: analgésie, euphorie, dépression respiratoire, myosis, constipation, nausées. Interactions: syndrome sérotoninergique avec ISRS/IMAO (tramadol, fentanyl etc). Méthadone: allongement QT. Codéine/tramadol: substrats CYP2D6. CI: dépression respiratoire aiguë, asthme aiguë, BPCO sévère."},
+      {name:"Antagonistes des opioïdes", icon:"🛡️", content:"Naloxone: antagoniste central+périphérique, intoxications aiguës opioïdes. Naltrexone: dépendance opioïdes après désintoxication, aussi alcoolisme. Nalméfène: alcoolisme. Méthylnaltrexone: antagoniste périphérique uniquement, constipation liée aux opioïdes sans modifier analgésie centrale. CI méthylnaltrexone: obstruction GI. Effets méthylnaltrexone: douleurs abdominales, diarrhée, nausées, rarement perforation GI."}
+    ]
+  },
+  ch11: {
+    title: "Chapitre 11",
+    subtitle: "Le système nerveux",
+    icon: "🧠",
+    themes: [
+      {name:"Hypnotiques & anxiolytiques", icon:"😴", content:"Benzodiazépines: agissent sur récepteurs GABA-A, facilitent ouverture canaux chlorure. 5 effets: réduction anxiété, sédation, relaxant musculaire, anticonvulsivant, amnésiant antérograde. Tolérance et dépendance après 1-2 semaines. Arrêt progressif -10-20% par semaine. Classification: courte durée (T1/2 <10h): triazolam, midazolam, zolpidem, zopiclone; intermédiaire (10-20h): alprazolam, bromazépam, lorazépam, oxazépam; longue durée (>20h): diazépam, clonazépam, clorazépate, flurazépam. Doses équivalentes 10mg diazépam: alprazolam 0,5-1mg, bromazépam 4,5-10mg, lorazépam 1-2mg, triazolam 0,125-0,5mg. IM: sédation exagérée avec alcool/sédatifs. Substrats CYP3A4: alprazolam, flurazépam, midazolam, triazolam. CI: myasthénie grave, insuffisance respiratoire sévère, apnée obstructive non traitée. EI: somnolence, confusion PA, réactions paradoxales, tolérance, dépendance, sevrage. Z-drugs (zopiclone/zolpidem): même mécanisme GABA-A, parasomnies supplémentaires (somnambulisme, conduite en dormant). Mélatonine: CYP1A2, 2mg insomnie. Valériane 450mg-1g."},
+      {name:"Antipsychotiques", icon:"🧪", content:"Schizophrénie: 1% population. Symptômes positifs (hallucinations, délires) → hyperactivité mésolimbique. Symptômes négatifs (anhédonie, retrait) → hypoactivité mésocorticale. Voie nigrostriée: motricité. Voie tubéro-infundibulaire: prolactine. Mécanisme: antagonisme D2 (~80% récepteurs). Typiques: phénothiazines (lévomépromazine), thioxanthènes (flupentixol, zuclopentixol), butyrophénones (halopéridol, dropéridol), benzamides (amisulpride, sulpiride). Atypiques: antagonisme mixte 5HT2A+D2. Aripiprazole: agoniste partiel D2 (traite + et -). Quétiapine: 25mg hypnotique, 300mg antidépresseur, 800mg antipsychotique. Clozapine: agranulocytose, myocardite, uniquement si échec autres. Olanzapine/clozapine: risque métabolique +++. IM: torsades de pointes (dropéridol, pimozide, sertindole). CI: troubles conscience, QT allongé. EI: symptômes extrapyramidaux (dystonie, parkinsonisme, dyskinésies tardives), hyperprolactinémie. Syndrome malin: hyperthermie >40°C, rigidité, akinésie → arrêt + dopamine."},
+      {name:"Antidépresseurs", icon:"💙", content:"Hypothèse monoamine: déficit NA/5-HT. ISRS: fluoxétine, fluvoxamine, paroxétine, citalopram, escitalopram, sertraline. IM ISRS: hémorragie avec antithrombotiques/AINS, hyponatrémie avec diurétiques, syndrome sérotoninergique. CYP: fluoxétine inhibiteur CYP2D6/2C9/2C19/3A4; fluvoxamine inhibiteur CYP1A2/2C9/2C19/2D6/3A4. Syndrome sérotoninergique: agitation, myoclonies, hyperthermie, rigidité musculaire. ATC: imipramine, amitriptyline, clomipramine, nortriptyline. CI: IMAO, IDM récent, arythmies, bloc AV. EI: anticholinergiques, hypotension orthostatique. IRSN: venlafaxine (CYP2D6), duloxétine (CYP1A2+2D6). Mirtazapine: antagoniste α2+5HT+H1, sédation, prise poids. Lithium (bipolaire): lithémie cible 0,6-0,8 mmol/l, marge étroite. EI lithium: tremblements, polyurie, hypothyroïdie, néphrotoxicité. CI: déshydratation, hypothyroïdie non traitée, insuffisance rénale sévère."},
+      {name:"TDAH & narcolepsie", icon:"⚡", content:"TDAH: manque contrôle voies inhibitrices SNC. Méthylphénidate (sympathicomimétique indirect, CYP2D6), atomoxétine (ISRNA, substrat CYP2D6), guanfacine (agoniste α2). Méthylphénidate enfants ≥6 ans: 5-60mg/j. IM: IMAO → poussées HTA. CI méthylphénidate: HTA modérée-sévère, psychose, troubles bipolaires, hyperthyroïdie. Narcolepsie: endormissements soudains + cataplexie. Modafinil (substrat CYP3A4, CI grossesse), pitolisant (substrat/inducteur CYP3A4, substrat/inhibiteur CYP2D6), oxybate. EI oxybate: dépression respiratoire, risque abus, énurésie. Guanfacine: QT allongement, sédation, bradycardie."},
+      {name:"Médicaments de la dépendance", icon:"🔗", content:"Alcoolisme – sevrage: BZD (diazépam/lorazépam) + thiamine B1 (encéphalopathie de Wernicke). Prévention rechutes: acamprosate (GABA-like), naltrexone (antagoniste opioïdes), nalméfène, disulfirame (réaction grave avec alcool: collapse CV). CI disulfirame: insuffisance cardiaque, HTA, psychose, risque suicidaire. Tabagisme: substitution nicotinique (innocuité favorable), varénicline (agoniste partiel nicotinique, EI nausées), bupropione (substrat CYP2B6, inhibiteur CYP2D6). CI bupropione: tumeur SNC, sevrage BZD/alcool, troubles bipolaires, schizophrénie, IMAO. Opiacés – substitution: méthadone (CYP2B6, allongement QT, 60-100mg/j) ou buprénorphine (CYP3A4, agoniste partiel, 12-24mg/j sublinguale). Association buprénorphine+naloxone: prévention abus IV."},
+      {name:"Antiparkinsoniens", icon:"🫀", content:"Parkinson: dégénérescence neurones dopaminergiques. Symptômes: hypokinésie, tremblement repos (pill-rolling), rigidité musculaire. Phases ON (dyskinésie)/OFF (akinésie). Lévodopa+bensérazide: plus efficace, complications long terme (dyskinésies, wearing-off, on-off). IM: repas protéinés diminuent absorption; antagonistes dopaminergiques diminuent effet; inhibiteurs COMT/MAO-B augmentent effet. CI: IDM récent, arythmies, psychose, glaucome angle fermé. Agonistes dopaminergiques: pramipexole, ropinirole, rotigotine, bromocriptine (dérivé ergot, réactions fibrotiques). Aussi restless legs syndrome. EI: hallucinations, somnolence soudaine, comportement compulsif (jeux, hypersexualité, boulimie). Inhibiteurs COMT: entacapone 200mg avec chaque dose lévodopa. Inhibiteurs MAO-B: rasagiline (1mg matin), safinamide (100mg matin), sélégiline. Anticholinergiques: bipéridène, trihexyphénidyle."},
+      {name:"Antiépileptiques", icon:"⚡", content:"Épilepsie: décharge neuronale anormale. Mécanismes: renforcement GABA, inhibition canaux Na+, inhibition canaux Ca2+. Types: partielles/focales vs généralisées (absences, myocloniques, tonico-cloniques). Valproate: 1er choix épilepsie généralisée, CI absolue grossesse. EI: troubles GI, prise poids, perte cheveux, thrombopénie. Substrat CYP2C9/2C19. Lamotrigine: rash fréquent (risque si augmentation trop rapide ou association valproate). IM: contraceptifs oraux diminuent lamotrigine; valproate augmente lamotrigine. Carbamazépine: 1er choix crises focales, névralgie trijumeau, troubles bipolaires. Inducteur puissant CYP1A2/2B6/2C9/3A4. EI: rash, Stevens-Johnson, hyponatrémie. Phénobarbital: place limitée, effets cognitifs négatifs. Inducteur CYP. Gabapentine/prégabaline: douleurs neuropathiques + anxiété (prégabaline). Renforcent effet opioïdes. Phénytoïne: hyperplasie gingivale, dysmorphie faciale. Allergie croisée carbamazépine. Lévétiracétam: pas d'interactions PK. Topiramate: ralentissement cognitif, CI grossesse."},
+      {name:"Antimigraineux", icon:"🤕", content:"Migraine: 10-15% population, femmes 2x plus. Rôle 5-HT. Traitement aigu: 1er intention paracétamol/AAS, 2e intention AINS + métoclopramide, 3e intention triptans (antagonistes 5-HT). Triptans: almotriptan, eletriptan, frovatriptan, naratriptan, rizatriptan, sumatriptan, zolmitriptan. IM triptans: spasmes coronariens si association dérivés ergot (intervalle ≥24h après ergot, ≥6h après triptan). CI triptans: coronaropathie, ATCD vasculaire cérébral, HTA non contrôlée, migraine hémiplégique. EI triptans: oppression thoracique, nausées, céphalées médicamenteuses (usage chronique). Prophylaxie (≥2 crises/mois): β-bloquants 1er choix (métoprolol, propranolol); alternatives: valproate, topiramate (CI grossesse tous deux), amitriptyline, flunarizine (antagoniste calcique, EI: dépression, symptômes EP, prise poids). Évaluation après 2-3 mois; arrêt progressif après 6-12 mois."},
+      {name:"Maladie d'Alzheimer", icon:"🧠", content:"Alzheimer: perte progressive neurones. MMSE: <24 atteint (20-24 léger, 10-19 modéré, <10 sévère). Causes: plaques amyloïdes (peptide Aβ) + dégénérescences neurofibrillaires (protéine Tau). Hypothèse cholinergique. Inhibiteurs cholinestérase: donépézil (5-10mg/j, substrat CYP3A4+CYP2D6), galantamine (8-24mg/j, substrat CYP3A4+CYP2D6), rivastigmine (3-12mg/j ou patch). Efficacité similaire, durée 1-2 ans. IM: antagonisme avec anticholinergiques; risque EP avec antipsychotiques; bradycardie avec β-bloquants/vérapamil. CI: risque QT allongé; galantamine: insuffisance hépatique sévère. EI: nausées, diarrhée, bradycardie, sudation, incontinence urinaire. Mémantine: antagoniste NMDA, formes modérées-sévères. EI: hallucinations, confusion, bradycardie, bloc AV."},
+      {name:"Spasticité & SEP", icon:"💪", content:"Spasticité: augmentation tonus musculaire suite lésion cérébrale/médullaire (SEP, SLA, AVC). Baclofène: analogue GABA, 1er choix spasticité spinale. Tizanidine: alternative baclofène. Dantrolène: acteur direct cellule musculaire, surtout hyperthermie maligne aujourd'hui. Toxine botulique: affections localisées. Cannabinoïdes: complément traitement SEP (efficacité limitée, minorité patients). Fampridine (4-aminopyridine): améliore périmètre de marche SEP. Évaluation clinique après ~2 mois."}
+    ]
+  }
+};
+
+// Liste plate de tous les thèmes pour le mode global
+const ALL_CHAPTERS = [
+  ...BOOK.ch9.themes.map(t=>({...t, chapterTitle:"Chapitre 9"})),
+  ...BOOK.ch11.themes.map(t=>({...t, chapterTitle:"Chapitre 11"}))
 ];
 
 const Q_TYPES = ["QCM","Question ouverte","Cas clinique"];
-let currentChapters = [];
+let currentPool = [];   // thèmes utilisés pour le quiz actuel
+let currentChapterKey = null;
 let currentQIndex = 0;
 let scores = [];
 let questions = [];
 
-function showScreen(id){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));document.getElementById("screen-"+id).classList.add("active");}
+// ──────────────────────────────────────────────
+// NAVIGATION
+// ──────────────────────────────────────────────
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById("screen-"+id).classList.add("active");
+  window.scrollTo(0,0);
+}
 
-function init(){
-  ["chapters-preview","chapter-select-grid"].forEach(containerId=>{
-    const container = document.getElementById(containerId);
-    CHAPTERS.forEach(ch=>{
-      const div=document.createElement("div");
-      div.className="chapter-chip";
-      div.innerHTML=`<span class="ch-icon">${ch.icon}</span><span class="ch-name">${ch.name}</span>`;
-      div.onclick=()=>startQuiz([ch]);
-      container.appendChild(div);
-    });
+// ──────────────────────────────────────────────
+// OUVERTURE D'UN CHAPITRE
+// ──────────────────────────────────────────────
+function openChapter(key){
+  currentChapterKey = key;
+  const ch = BOOK[key];
+  document.getElementById("th-chapter-icon").textContent = ch.icon;
+  document.getElementById("th-chapter-title").textContent = ch.title;
+  document.getElementById("th-chapter-sub").textContent = ch.subtitle;
+
+  // Remplir la liste des thèmes
+  const list = document.getElementById("theme-list");
+  list.innerHTML = "";
+  ch.themes.forEach(th=>{
+    const div = document.createElement("div");
+    div.className = "theme-row";
+    div.innerHTML = `<div class="theme-row-icon">${th.icon}</div><div class="theme-row-name">${th.name}</div><div class="theme-row-check">✓</div>`;
+    div.onclick = () => {
+      // Démarrer immédiatement sur ce thème
+      startQuiz([th]);
+    };
+    list.appendChild(div);
   });
+
+  showScreen("themes");
 }
 
-function startExamMode(){startQuiz(CHAPTERS);}
-function retryQuiz(){startQuiz(currentChapters);}
-
-function startQuiz(chaps){
-  currentChapters=chaps;currentQIndex=0;scores=[];questions=[];
-  showScreen("quiz");loadQuestion();
+function examAllThemes(){
+  const ch = BOOK[currentChapterKey];
+  startQuiz(ch.themes);
 }
 
+// ──────────────────────────────────────────────
+// DÉMARRAGE DU QUIZ
+// ──────────────────────────────────────────────
+function startQuiz(pool){
+  currentPool = pool;
+  currentQIndex = 0;
+  scores = [];
+  questions = [];
+  showScreen("quiz");
+  loadQuestion();
+}
+
+function retryQuiz(){ startQuiz(currentPool); }
+
+// ──────────────────────────────────────────────
+// GÉNÉRATION DES QUESTIONS
+// ──────────────────────────────────────────────
 async function loadQuestion(){
   setLoading(true,"Génération de la question...");
   clearQuestion();
-  const chap=currentChapters[Math.floor(Math.random()*currentChapters.length)];
-  const qtype=Q_TYPES[Math.floor(Math.random()*Q_TYPES.length)];
-  document.getElementById("q-num-label").textContent=`Question ${currentQIndex+1}`;
-  document.getElementById("prog-fill").style.width=`${Math.min(5+currentQIndex*10,95)}%`;
-  document.getElementById("q-chap-badge").textContent=chap.name;
-  const tb=document.getElementById("q-type-badge");
-  tb.textContent=qtype;
-  tb.className="badge "+(qtype==="QCM"?"badge-qcm":qtype==="Cas clinique"?"badge-case":"badge-open");
+  const theme = currentPool[Math.floor(Math.random()*currentPool.length)];
+  const qtype = Q_TYPES[Math.floor(Math.random()*Q_TYPES.length)];
+  document.getElementById("q-num-label").textContent = `Question ${currentQIndex+1}`;
+  document.getElementById("prog-fill").style.width = `${Math.min(5+currentQIndex*10,95)}%`;
+  document.getElementById("q-chap-badge").textContent = theme.name;
+  const tb = document.getElementById("q-type-badge");
+  tb.textContent = qtype;
+  tb.className = "badge "+(qtype==="QCM"?"badge-qcm":qtype==="Cas clinique"?"badge-case":"badge-open");
 
-  let prompt="";
+  let prompt = "";
   if(qtype==="QCM"){
-    prompt=`Tu es professeur de pharmacologie. Génère une QCM sur "${chap.name}". Cours: ${chap.content}
+    prompt=`Tu es professeur de pharmacologie. Génère une QCM sur "${theme.name}". Cours: ${theme.content}
 Réponds UNIQUEMENT en JSON valide sans backticks:
 {"question":"...","options":["A) ...","B) ...","C) ...","D) ..."],"correct":"A","explanation":"..."}`;
   } else if(qtype==="Question ouverte"){
-    prompt=`Tu es professeur de pharmacologie. Génère une question ouverte sur "${chap.name}". Cours: ${chap.content}
+    prompt=`Tu es professeur de pharmacologie. Génère une question ouverte sur "${theme.name}". Cours: ${theme.content}
 Réponds UNIQUEMENT en JSON valide sans backticks:
 {"question":"...","expectedPoints":["point1","point2","point3"]}`;
   } else {
-    prompt=`Tu es professeur de pharmacologie. Génère un cas clinique sur "${chap.name}". Cours: ${chap.content}
+    prompt=`Tu es professeur de pharmacologie. Génère un cas clinique sur "${theme.name}". Cours: ${theme.content}
 Réponds UNIQUEMENT en JSON valide sans backticks:
 {"scenario":"...","question":"...","expectedPoints":["point1","point2"]}`;
   }
 
   try{
-    const resp=await fetch("/.netlify/functions/claude",{
+    const resp = await fetch("/.netlify/functions/claude",{
       method:"POST",
       headers:{"Content-Type":"application/json"},
       body:JSON.stringify({messages:[{role:"user",content:prompt}]})
     });
-    const data=await resp.json();
-    const raw=data.content.map(b=>b.text||"").join("");
-    const q=JSON.parse(raw.replace(/```json|```/g,"").trim());
-    q.type=qtype;q.chapter=chap;
+    const data = await resp.json();
+    const raw = data.content.map(b=>b.text||"").join("");
+    const q = JSON.parse(raw.replace(/```json|```/g,"").trim());
+    q.type = qtype; q.theme = theme;
     questions.push(q);
     setLoading(false);
     renderQuestion(q);
   } catch(e){
     setLoading(false);
-    document.getElementById("q-text").textContent="Erreur de génération. Vérifie ta connexion.";
+    document.getElementById("q-text").textContent = "Erreur de génération. Vérifie ta connexion.";
   }
 }
 
@@ -226,6 +324,7 @@ function clearQuestion(){
   document.getElementById("q-options").innerHTML="";
   document.getElementById("q-textarea").style.display="none";
   document.getElementById("q-textarea").disabled=false;
+  document.getElementById("q-textarea").value="";
   document.getElementById("q-feedback").className="feedback";
   document.getElementById("q-feedback").innerHTML="";
   document.getElementById("q-actions").innerHTML="";
@@ -234,14 +333,14 @@ function clearQuestion(){
 function renderQuestion(q){
   if(q.type==="Cas clinique"&&q.scenario){
     const sc=document.getElementById("q-scenario");
-    sc.textContent=q.scenario;sc.style.display="block";
+    sc.textContent=q.scenario; sc.style.display="block";
   }
   document.getElementById("q-text").textContent=q.question;
   if(q.type==="QCM"){
     const opts=document.getElementById("q-options");
     q.options.forEach((opt,i)=>{
       const btn=document.createElement("button");
-      btn.className="option-btn";btn.textContent=opt;
+      btn.className="option-btn"; btn.textContent=opt;
       btn.onclick=()=>selectOption(btn,i,q);
       opts.appendChild(btn);
     });
@@ -286,37 +385,44 @@ Réponds UNIQUEMENT en JSON sans backticks:
     if(ev.pointsManquants&&ev.pointsManquants.length)fb+="<br><br><strong>À revoir:</strong> "+ev.pointsManquants.join(", ");
     showFeedback(level,fb);
   }catch(e){scores.push(0.5);showFeedback("partial","Réponse enregistrée.");}
-  setLoading(false);showNextActions();
+  setLoading(false);
+  showNextActions();
 }
 
-function showFeedback(level,html){const fb=document.getElementById("q-feedback");fb.className="feedback show "+level;fb.innerHTML=html;}
+function showFeedback(level,html){
+  const fb=document.getElementById("q-feedback");
+  fb.className="feedback show "+level;
+  fb.innerHTML=html;
+}
 
 function showNextActions(){
   const canFinish=scores.length>=5;
   document.getElementById("q-actions").innerHTML=`
     <button class="btn-primary" onclick="nextQuestion()">Question suivante →</button>
-    ${canFinish?"<button class='btn-ghost' onclick='showResults()'>Voir les résultats</button>":""}
+    ${canFinish?`<button class='btn-ghost' onclick='showResults()'>Voir les résultats</button>`:""}
   `;
 }
 
-function nextQuestion(){currentQIndex++;loadQuestion();}
+function nextQuestion(){ currentQIndex++; loadQuestion(); }
 
 function setLoading(show,text=""){
   const el=document.getElementById("q-loading");
   el.className="loading"+(show?" show":"");
-  if(text)document.getElementById("q-loading-text").textContent=text;
+  if(text) document.getElementById("q-loading-text").textContent=text;
 }
 
 function showResults(){
-  const total=scores.length,sum=scores.reduce((a,b)=>a+b,0),pct=Math.round((sum/total)*100);
+  const total=scores.length, sum=scores.reduce((a,b)=>a+b,0), pct=Math.round((sum/total)*100);
   document.getElementById("res-pct").textContent=pct+"%";
   document.getElementById("res-title").textContent=pct>=80?"🎉 Excellent !":pct>=60?"👍 Bien joué !":"📚 Continue à réviser !";
   document.getElementById("res-sub").textContent=`${Math.round(sum*2)/2} / ${total} bonnes réponses`;
-  document.getElementById("res-stats").innerHTML=`<p class="section-label" style="margin-bottom:1rem;">Résumé</p><div class="stat-row"><span style="color:var(--muted);">Questions répondues</span><span style="font-weight:500;">${total}</span></div><div class="stat-row"><span style="color:var(--muted);">Bonnes réponses</span><span style="font-weight:500;color:var(--green);">${Math.round(sum*2)/2}</span></div><div class="stat-row"><span style="color:var(--muted);">Mauvaises réponses</span><span style="font-weight:500;color:var(--red);">${total-Math.round(sum*2)/2}</span></div>`;
+  document.getElementById("res-stats").innerHTML=`
+    <p class="section-label" style="margin-bottom:1rem;">Résumé</p>
+    <div class="stat-row"><span style="color:var(--muted);">Questions répondues</span><span style="font-weight:500;">${total}</span></div>
+    <div class="stat-row"><span style="color:var(--muted);">Bonnes réponses</span><span style="font-weight:500;color:var(--green);">${Math.round(sum*2)/2}</span></div>
+    <div class="stat-row"><span style="color:var(--muted);">Mauvaises réponses</span><span style="font-weight:500;color:var(--red);">${total-Math.round(sum*2)/2}</span></div>`;
   showScreen("results");
 }
-
-init();
 </script>
 </body>
 </html>
