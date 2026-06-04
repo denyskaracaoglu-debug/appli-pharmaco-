@@ -320,7 +320,7 @@ Si l'ordonnance est problématique, decision="refuser". Sinon decision="délivre
   }
 
   try{
-    const resp = await fetch("/.netlify/functions/claude",{
+    const resp = await fetch("/api/claude",{
       method:"POST",
       headers:{"Content-Type":"application/json"},
       body:JSON.stringify({messages:[{role:"user",content:prompt}]})
@@ -448,7 +448,7 @@ async function submitOpen(){
   setLoading(true,"Correction en cours...");
   const q=questions[questions.length-1];
   try{
-    const resp=await fetch("/.netlify/functions/claude",{
+    const resp=await fetch("/api/claude",{
       method:"POST",
       headers:{"Content-Type":"application/json"},
       body:JSON.stringify({messages:[{role:"user",content:`Évalue cette réponse de pharmacologie.
