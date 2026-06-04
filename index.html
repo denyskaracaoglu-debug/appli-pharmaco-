@@ -35,9 +35,28 @@ body::before{content:"";position:fixed;top:-200px;right:-200px;width:600px;heigh
 .badge-qcm{background:rgba(52,211,153,0.15);color:var(--green);border:1px solid rgba(52,211,153,0.3);}
 .badge-open{background:rgba(251,191,36,0.15);color:var(--amber);border:1px solid rgba(251,191,36,0.3);}
 .badge-case{background:rgba(248,113,113,0.15);color:var(--red);border:1px solid rgba(248,113,113,0.3);}
+.badge-ordonnance{background:rgba(14,165,233,0.15);color:#38bdf8;border:1px solid rgba(14,165,233,0.3);}
 .q-meta{display:flex;align-items:center;gap:8px;margin-bottom:1rem;flex-wrap:wrap;}
 .q-scenario{background:var(--surface2);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:0.9rem 1rem;font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:1rem;}
 .q-text{font-family:"Syne",sans-serif;font-size:17px;font-weight:600;line-height:1.5;margin-bottom:1.25rem;}
+
+/* Ordonnance */
+.ordonnance{background:#12121a;border:1px dashed #3a3a50;border-radius:10px;padding:1.1rem 1.2rem;margin-bottom:1.25rem;font-size:13px;line-height:1.9;}
+.ordonnance-header{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.5rem;font-family:"Syne",sans-serif;}
+.ordonnance-patient{font-size:12px;color:var(--muted);margin-bottom:0.6rem;padding-bottom:0.6rem;border-bottom:1px solid var(--border);}
+.ordonnance-med{display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-bottom:1px solid rgba(46,46,62,0.5);}
+.ordonnance-med:last-child{border-bottom:none;}
+.med-num{color:var(--accent2);font-weight:600;font-size:12px;min-width:16px;}
+.med-info{flex:1;}
+.med-name{font-weight:500;color:var(--text);}
+.med-dose{color:var(--muted);font-size:12px;}
+.decision-btns{display:flex;gap:10px;margin-top:0.75rem;}
+.btn-deliver{flex:1;padding:0.85rem;background:rgba(52,211,153,0.12);color:var(--green);border:1px solid rgba(52,211,153,0.4);border-radius:10px;font-size:15px;font-weight:500;font-family:"DM Sans",sans-serif;cursor:pointer;transition:all 0.15s;}
+.btn-deliver:hover:not(:disabled){background:rgba(52,211,153,0.22);}
+.btn-refuse{flex:1;padding:0.85rem;background:rgba(248,113,113,0.12);color:var(--red);border:1px solid rgba(248,113,113,0.4);border-radius:10px;font-size:15px;font-weight:500;font-family:"DM Sans",sans-serif;cursor:pointer;transition:all 0.15s;}
+.btn-refuse:hover:not(:disabled){background:rgba(248,113,113,0.22);}
+.btn-deliver:disabled,.btn-refuse:disabled{opacity:0.4;cursor:default;}
+
 .option-btn{display:block;width:100%;text-align:left;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:0.85rem 1rem;margin-bottom:8px;cursor:pointer;font-size:14px;color:var(--text);font-family:"DM Sans",sans-serif;transition:all 0.15s;line-height:1.5;}
 .option-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);}
 .option-btn.correct{border-color:var(--green);background:rgba(52,211,153,0.1);color:var(--green);}
@@ -62,19 +81,10 @@ textarea:focus{outline:none;border-color:var(--accent);}
 .loading.show{display:flex;}
 .spinner{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.7s linear infinite;flex-shrink:0;}
 @keyframes spin{to{transform:rotate(360deg);}}
-
-/* Sous-thème chips */
 .theme-row{display:flex;align-items:center;gap:12px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:0.9rem 1rem;margin-bottom:8px;cursor:pointer;transition:all 0.2s;}
 .theme-row:hover{border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(3px);}
-.theme-row.selected{border-color:var(--accent);background:rgba(124,106,247,0.15);}
 .theme-row-icon{font-size:18px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;background:rgba(124,106,247,0.12);border-radius:8px;flex-shrink:0;}
 .theme-row-name{font-size:14px;font-weight:500;flex:1;}
-.theme-row-check{color:var(--accent);font-size:16px;display:none;}
-.theme-row.selected .theme-row-check{display:block;}
-
-/* Breadcrumb */
-.breadcrumb{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);margin-bottom:1rem;flex-wrap:wrap;}
-.breadcrumb span{color:var(--text);}
 </style>
 </head>
 <body>
@@ -84,10 +94,14 @@ textarea:focus{outline:none;border-color:var(--accent);}
     <div><div class="app-title">Quiz Pharmacologie</div><div class="app-sub">Révision intelligente par IA</div></div>
   </div>
 
-  <!-- ÉCRAN 1 : Accueil — choisir le chapitre -->
+  <!-- ÉCRAN 1 : Accueil -->
   <div id="screen-home" class="screen active">
     <div class="card">
       <p class="section-label">Choisir un chapitre</p>
+      <button class="mode-btn" onclick="openChapter('ch3')">
+        <div class="mode-icon" style="background:rgba(248,113,113,0.15);">🩸</div>
+        <div><div class="m-title">Chapitre 3</div><div class="m-desc">Sang & coagulation</div></div>
+      </button>
       <button class="mode-btn" onclick="openChapter('ch9')">
         <div class="mode-icon" style="background:rgba(251,191,36,0.15);">💊</div>
         <div><div class="m-title">Chapitre 9</div><div class="m-desc">Douleur, fièvre & analgésiques</div></div>
@@ -106,7 +120,7 @@ textarea:focus{outline:none;border-color:var(--accent);}
     </div>
   </div>
 
-  <!-- ÉCRAN 2 : Sous-thèmes d'un chapitre -->
+  <!-- ÉCRAN 2 : Sous-thèmes -->
   <div id="screen-themes" class="screen">
     <button class="btn-back" onclick="showScreen('home')" style="margin-bottom:1rem;">← Retour</button>
     <div class="card">
@@ -118,7 +132,7 @@ textarea:focus{outline:none;border-color:var(--accent);}
         </div>
       </div>
       <p class="section-label">Mode</p>
-      <button class="mode-btn" id="btn-exam-all" onclick="examAllThemes()">
+      <button class="mode-btn" onclick="examAllThemes()">
         <div class="mode-icon" style="background:rgba(251,191,36,0.15);">🎯</div>
         <div><div class="m-title">Mode examen</div><div class="m-desc">Tous les sous-thèmes mélangés</div></div>
       </button>
@@ -143,6 +157,7 @@ textarea:focus{outline:none;border-color:var(--accent);}
       </div>
       <div id="q-scenario" class="q-scenario" style="display:none;"></div>
       <div class="q-text" id="q-text"></div>
+      <div id="q-ordonnance" style="display:none;"></div>
       <div id="q-options"></div>
       <textarea id="q-textarea" placeholder="Écris ta réponse ici..." style="display:none;"></textarea>
       <div class="feedback" id="q-feedback"></div>
@@ -165,57 +180,59 @@ textarea:focus{outline:none;border-color:var(--accent);}
 </div>
 
 <script>
-// ──────────────────────────────────────────────
-// DONNÉES
-// ──────────────────────────────────────────────
 const BOOK = {
+  ch3: {
+    title:"Chapitre 3", subtitle:"Sang & coagulation", icon:"🩸",
+    themes:[
+      {name:"Antiagrégants plaquettaires", icon:"🔴", hasPrescription:true, content:"Hémostase: vasoconstriction + adhésion plaquettaire + formation fibrine. Antiagrégants: inhibiteurs COX-1 (aspirine), antagonistes P2Y12 (clopidogrel/prasugrel/ticagrelor/ticlopidine), inhibiteur recapture adénosine (dipyridamole), antagonistes GPIIb/IIIa (eptifibatide/tirofiban/abciximab), analogue PGI2 (époprosténol). Aspirine: acétylation irréversible COX-1, inhibe TXA2, durée 7-10j (vie plaquette). Usages aspirine: SCA, AVC ischémique, prévention secondaire CV. Pas de place en prévention primaire. Posologie aspirine: SCA 300mg puis 75-100mg/j; AVC 160-300mg puis 75-100mg/j. IM aspirine: risque hémorragie avec anticoagulants/AINS/ISRS/IRSN. CI aspirine: hémorragie active, ulcère gastro-duodénal, enfants <12 ans infection virale, insuffisance rénale/hépatique sévère. Clopidogrel/prasugrel: inhibition irréversible P2Y12, prodrogues métabolisées CYP2C19. Ticagrelor: inhibition réversible P2Y12. Clopidogrel: substrat CYP2C19+CYP3A4, inhibiteur CYP2B6+CYP2C8. Ticagrelor: substrat+inhibiteur CYP3A4+P-gp. CI prasugrel: ATCD AVC/AIT. CI ticagrelor: hémorragie intracrânienne, insuffisance hépatique sévère. EI thienopyridines: hémorragies, ticlopidine: toxicité hématologique. Dipyridamole: inhibe phosphodiestérase type 3 + recapture adénosine + synthèse TXA2. Posologie: 300-450mg/j avec AVK pour prothèses valvulaires. GPIIb/IIIa: IV uniquement (milieu hospitalier). Epoprosténol: hémodialyse, hypertension pulmonaire."},
+      {name:"Anticoagulants injectables", icon:"💉", hasPrescription:true, content:"Héparines: glycosaminoglycans. Non fractionnées (HNF): inhibent FIIa+FXa via antithrombine, effet rapidement réversible, 3x/j SC. Fractionnées HBPM (daltéparine, énoxaparine, nadroparine, tinzaparine): forte action anti-FXa, longue demi-vie, 1x/j SC, pas de monitoring habituel sauf insuffisance rénale. Fondaparinux: pentasaccharide synthétique, inhibe uniquement FXa. Bivalirudine: inhibiteur direct thrombine. IM héparines: risque hémorragie avec antithrombotiques/AINS/ISRS/IRSN; risque spasmes vasculaires avec dérivés ergot. EI héparines: hémorragie, thrombopénie induite héparine (TIH), hyperkaliémie, augmentation enzymes hépatiques. CI héparines: hémorragie active, TIH, endocardite bactérienne aiguë. HNF CI aussi: insuffisance rénale/hépatique sévère. Antidote héparines: protamine (10mg neutralise 1000UI héparine), neutralisation incomplète pour HBPM."},
+      {name:"Anticoagulants oraux – AVK", icon:"💊", hasPrescription:true, content:"AVK (antagonistes vitamine K): inhibition compétitive VKORC1. Inhibent synthèse facteurs II, VII, IX, X + protéine C et S. Délai action = temps dégradation facteurs existants (VII 6h < IX < X < II 60h). Marge thérapeutique étroite, ajustement selon INR. Acénocoumarol: demi-vie 8h, anticoagulation 48h. Warfarine: demi-vie 20-60h, anticoagulation 2-5 jours. Phénprocoumone: demi-vie 140-160h, anticoagulation 1-2 semaines. IM AVK: augmentation effet: inhibiteurs CYP2C9 (cimétidine, amiodarone, antifongiques azolés), AINS déplacent liaison albumine, antibiotiques à large spectre (diminuent vit K), AINS/ISRS/IRSN (risque hémorragique). Diminution effet: inducteurs CYP2C9 (carbamazépine, phénytoïne, rifampicine), cholestyramine, suppléments vit K. CI AVK: hémorragie active, grossesse, insuffisance rénale/hépatique sévère. EI: hémorragie, augmentation transitoire enzymes hépatiques."},
+      {name:"Anticoagulants oraux – AOD", icon:"🔵", hasPrescription:true, content:"AOD (anticoagulants oraux directs): marge thérapeutique moins étroite que AVK. Dabigatran (étéxilate=prodrogue): inhibiteur direct thrombine réversible compétitif. Substrat P-gp. Posologie: prévention TVP 220mg/j 1 prise; FA non valvulaire 300mg/j 2 prises; TVP/EP traitement 300mg/j 2 prises. Apixaban: inhibiteur FXa direct. Substrat CYP3A4+P-gp. Posologie: FA 20mg/j 1 prise; TVP/EP traitement 30mg/j 2 prises 21j puis 20mg/j; prévention TVP 10mg/j. Edoxaban: inhibiteur FXa. Substrat P-gp. 60mg/j 1 prise. Rivaroxaban: inhibiteur FXa. Substrat CYP3A4+P-gp. CI tous AOD: hémorragie active, prothèses valvulaires, atteinte hépatique avec coagulopathie. Dabigatran CI aussi: insuffisance rénale sévère. EI AOD: hémorragie (risque augmente si insuffisance rénale), troubles GI, augmentation enzymes hépatiques. Dabigatran: suspicion risque accru IDM."},
+      {name:"Thrombolytiques & antihémorragiques", icon:"⚡", hasPrescription:false, content:"Thrombolytiques: activateurs du plasminogène. Altéplase (tPA recombinant): IDM aigu, embolie pulmonaire, AVC ischémique. Ténectéplase: IDM aigu. Urokinase: embolie pulmonaire, thrombose artérielle/veineuse. Tous IV, usage hospitalier. IM thrombolytiques: risque hémorragie avec antithrombotiques/AINS/ISRS. CI thrombolytiques: hémorragie active, endocardite bactérienne, péricardite, pancréatite aiguë, insuffisance hépatique sévère. Altéplase AVC CI aussi: convulsions, hyper/hypoglycémie, ATCD AVC sévère. EI: hémorragie, hypersensibilité rare. Antihémorragiques: acide tranexamique (antifibrinolytique): prostatectomie, amygdalectomie, extraction dentaire, ménorragies. Aprotinine: antifibrinolytique. Protamine: antidote héparines, 10mg neutralise 1000UI. EI protamine: hypotension, bradycardie."}
+    ]
+  },
   ch9: {
-    title: "Chapitre 9",
-    subtitle: "Douleur, fièvre & analgésiques",
-    icon: "💊",
-    themes: [
-      {name:"Physiopathologie douleur & fièvre", icon:"🧠", content:"Thermorégulation: thermorécepteurs centraux et périphériques, centre thermorégulateur hypothalamique (noyau préoptique). Baisse T°: sudation + vasodilatation. Hausse T°: frissons + vasoconstriction + adipocytes bruns. Intermédiaires: prostaglandines, interleukines. Douleur: expérience subjective avec composante affective. Nociception différente de douleur. EVA = échelle visuelle analogique. PAG (zone grise périaqueductale): voies descendantes inhibitrices, Reynolds 1969. Fibres C: douleur sourde diffuse brûlante. Fibres Adelta: douleur aiguë localisée. Douleur chronique: hyperalgésie, allodynie. Douleur neuropathique: AVC, SEP, neuropathie diabétique, zona, répond mal aux analgésiques classiques mais aux antidépresseurs/antiépileptiques. Récepteurs µ opioïdes: CI, amygdale, hypothalamus, PAG, RVM, corne dorsale. Médiateurs: BK, 5-HT, PGs, NGF, substance P, CGRP, GABA, NA."},
-      {name:"Paracétamol", icon:"💊", content:"Paracétamol: analgésique-antipyrétique non narcotique. Inhibe synthèse PG dans SNC. Faible anti-inflammatoire, pas d'effets gastriques/plaquettaires. Inhibiteur faible COX-2. COX-3 dans SNC cible potentielle. AM404 active endocannabinoïdes/TRPV1. Demi-vie 2-4h, métabolisme hépatique. Toxicité >10g adulte, >150mg/kg enfant. NAPQI (CYP2E1) si glutathion épuisé → mort cellulaire. Antidote: acétylcystéine IV ou méthionine orale. Posologie adulte >= 50kg: max 4g/j (500mg-1g x4). Avec facteurs risque: max 3g/j. Interactions: alcool/barbituriques/phénytoïne/carbamazépine/isoniazide augmentent risque hépatique en surdosage. Flucloxacilline: risque AMTAE. CI: insuffisance rénale/hépatique sévère."},
-      {name:"AAS & autres analgésiques", icon:"🔬", content:"Aspirine: analgésique, antipyrétique, anti-inflammatoire (doses élevées 3-6g/j). Place limitée. Risque syndrome Reye enfants <12 ans infection virale (grippe, varicelle). Contre-indiqué grossesse. CI: hémorragie active, ulcère gastro-duodénal, enfants <12 ans infection virale. Métamizole: antipyrétique et spasmolytique. Agranulocytose = effet indésirable grave. Retiré marché certains pays. En Belgique: Novalgine. Syndromes Lyell et Stevens-Johnson. CI: hypotension, affections hématologiques. Néfopam: mécanisme inconnu, uniquement analgésique. CI: enfants, convulsions, IMAO, insuffisance rénale."},
-      {name:"Approche médicamenteuse", icon:"🏥", content:"Fièvre: traiter cause, pas toujours nécessaire. Paracétamol = 1er choix. Ibuprofène déconseillé si déshydratation/varicelle/zona. Douleur aiguë: étape 1 paracétamol, étape 2 AINS courte durée, étape 3 opioïde faible (codéine/tramadol), dernier recours opioïde puissant. Douleur chronique: approche pluridisciplinaire, schéma fixe. Opioïdes puissants place très limitée hors cancer. Douleur neuropathique chronique: antidépresseurs (duloxétine), antiépileptiques (carbamazépine, gabapentine, prégabaline). Echelle OMS soins palliatifs: Palier I non opioïde, Palier II opioïde faible, Palier III opioïde fort oral/transdermique, Palier IV opioïde fort parentéral."},
-      {name:"Les opioïdes", icon:"⚗️", content:"Morphine = composé référence dérivé phénanthrène. Structure déterminée 1902. Récepteurs: µ (MOPr) euphorie+++/dépression respiratoire+++/dépendance physique+++, κ (KOPr) dysphorie/hallucinations+++, δ (DOPr) analgésie spinale++, ORL1 catatonie++. Opioïdes faibles: codéine, tramadol. Puissants: morphine, fentanyl, oxycodone, méthadone, buprénorphine. Buprénorphine = agoniste partiel. Tolérance = besoin doses croissantes. Dépendance physique + psychique. Constipation: pas de tolérance. Effets: analgésie, euphorie, dépression respiratoire, myosis, constipation, nausées. Interactions: syndrome sérotoninergique avec ISRS/IMAO (tramadol, fentanyl etc). Méthadone: allongement QT. Codéine/tramadol: substrats CYP2D6. CI: dépression respiratoire aiguë, asthme aiguë, BPCO sévère."},
-      {name:"Antagonistes des opioïdes", icon:"🛡️", content:"Naloxone: antagoniste central+périphérique, intoxications aiguës opioïdes. Naltrexone: dépendance opioïdes après désintoxication, aussi alcoolisme. Nalméfène: alcoolisme. Méthylnaltrexone: antagoniste périphérique uniquement, constipation liée aux opioïdes sans modifier analgésie centrale. CI méthylnaltrexone: obstruction GI. Effets méthylnaltrexone: douleurs abdominales, diarrhée, nausées, rarement perforation GI."}
+    title:"Chapitre 9", subtitle:"Douleur, fièvre & analgésiques", icon:"💊",
+    themes:[
+      {name:"Physiopathologie douleur & fièvre", icon:"🧠", hasPrescription:false, content:"Thermorégulation: thermorécepteurs centraux et périphériques, centre thermorégulateur hypothalamique (noyau préoptique). Baisse T°: sudation + vasodilatation. Hausse T°: frissons + vasoconstriction + adipocytes bruns. Intermédiaires: prostaglandines, interleukines. Douleur: expérience subjective avec composante affective. Nociception différente de douleur. EVA = échelle visuelle analogique. PAG (zone grise périaqueductale): voies descendantes inhibitrices. Fibres C: douleur sourde diffuse brûlante. Fibres Adelta: douleur aiguë localisée. Douleur chronique: hyperalgésie, allodynie. Douleur neuropathique: AVC, SEP, neuropathie diabétique, zona. Récepteurs µ opioïdes: CI, amygdale, hypothalamus, PAG, corne dorsale. Médiateurs: BK, 5-HT, PGs, NGF, substance P, CGRP, GABA, NA."},
+      {name:"Paracétamol", icon:"💊", hasPrescription:true, content:"Paracétamol: analgésique-antipyrétique non narcotique. Inhibe synthèse PG dans SNC. Faible anti-inflammatoire, pas d'effets gastriques/plaquettaires. Inhibiteur faible COX-2. AM404 active endocannabinoïdes/TRPV1. Demi-vie 2-4h, métabolisme hépatique. Toxicité >10g adulte, >150mg/kg enfant. NAPQI (CYP2E1) si glutathion épuisé → mort cellulaire. Antidote: acétylcystéine IV ou méthionine orale. Posologie adulte >= 50kg: max 4g/j (500mg-1g x4). Avec facteurs risque: max 3g/j. IM: alcool/barbituriques/phénytoïne/carbamazépine/isoniazide augmentent risque hépatique. Flucloxacilline: risque AMTAE. CI: insuffisance rénale/hépatique sévère."},
+      {name:"AAS & autres analgésiques", icon:"🔬", hasPrescription:false, content:"Aspirine analgésique: place limitée. Risque syndrome Reye enfants <12 ans infection virale. CI grossesse. CI: hémorragie active, ulcère gastro-duodénal, enfants <12 ans infection virale. Métamizole: antipyrétique et spasmolytique. Agranulocytose = EI grave. En Belgique: Novalgine. Syndromes Lyell et Stevens-Johnson. CI: hypotension, affections hématologiques. Néfopam: mécanisme inconnu, uniquement analgésique. CI: enfants, convulsions, IMAO, insuffisance rénale."},
+      {name:"Approche médicamenteuse", icon:"🏥", hasPrescription:false, content:"Fièvre: traiter cause, pas toujours nécessaire. Paracétamol = 1er choix. Ibuprofène déconseillé si déshydratation/varicelle/zona. Douleur aiguë: étape 1 paracétamol, étape 2 AINS courte durée, étape 3 opioïde faible (codéine/tramadol). Douleur chronique: approche pluridisciplinaire. Douleur neuropathique: antidépresseurs (duloxétine), antiépileptiques (carbamazépine, gabapentine, prégabaline). Echelle OMS soins palliatifs: Palier I non opioïde, Palier II opioïde faible, Palier III opioïde fort oral/transdermique, Palier IV parentéral."},
+      {name:"Les opioïdes", icon:"⚗️", hasPrescription:true, content:"Morphine = composé référence. Récepteurs: µ (MOPr) euphorie+++/dépression respiratoire+++/dépendance+++, κ (KOPr) dysphorie/hallucinations+++, δ (DOPr) analgésie spinale++. Faibles: codéine, tramadol. Puissants: morphine, fentanyl, oxycodone, méthadone, buprénorphine (agoniste partiel). Tolérance = doses croissantes. Dépendance physique + psychique. Constipation: pas de tolérance. Effets: analgésie, euphorie, dépression respiratoire, myosis, constipation, nausées. IM: syndrome sérotoninergique avec ISRS/IMAO (tramadol, fentanyl). Méthadone: allongement QT. Codéine/tramadol: substrats CYP2D6. CI: dépression respiratoire aiguë, asthme aiguë, BPCO sévère."},
+      {name:"Antagonistes des opioïdes", icon:"🛡️", hasPrescription:false, content:"Naloxone: antagoniste central+périphérique, intoxications aiguës opioïdes. Naltrexone: dépendance opioïdes après désintoxication, aussi alcoolisme. Nalméfène: alcoolisme. Méthylnaltrexone: antagoniste périphérique uniquement, constipation liée aux opioïdes sans modifier analgésie centrale. CI méthylnaltrexone: obstruction GI. EI: douleurs abdominales, diarrhée, nausées, rarement perforation GI."}
     ]
   },
   ch11: {
-    title: "Chapitre 11",
-    subtitle: "Le système nerveux",
-    icon: "🧠",
-    themes: [
-      {name:"Hypnotiques & anxiolytiques", icon:"😴", content:"Benzodiazépines: agissent sur récepteurs GABA-A, facilitent ouverture canaux chlorure. 5 effets: réduction anxiété, sédation, relaxant musculaire, anticonvulsivant, amnésiant antérograde. Tolérance et dépendance après 1-2 semaines. Arrêt progressif -10-20% par semaine. Classification: courte durée (T1/2 <10h): triazolam, midazolam, zolpidem, zopiclone; intermédiaire (10-20h): alprazolam, bromazépam, lorazépam, oxazépam; longue durée (>20h): diazépam, clonazépam, clorazépate, flurazépam. Doses équivalentes 10mg diazépam: alprazolam 0,5-1mg, bromazépam 4,5-10mg, lorazépam 1-2mg, triazolam 0,125-0,5mg. IM: sédation exagérée avec alcool/sédatifs. Substrats CYP3A4: alprazolam, flurazépam, midazolam, triazolam. CI: myasthénie grave, insuffisance respiratoire sévère, apnée obstructive non traitée. EI: somnolence, confusion PA, réactions paradoxales, tolérance, dépendance, sevrage. Z-drugs (zopiclone/zolpidem): même mécanisme GABA-A, parasomnies supplémentaires (somnambulisme, conduite en dormant). Mélatonine: CYP1A2, 2mg insomnie. Valériane 450mg-1g."},
-      {name:"Antipsychotiques", icon:"🧪", content:"Schizophrénie: 1% population. Symptômes positifs (hallucinations, délires) → hyperactivité mésolimbique. Symptômes négatifs (anhédonie, retrait) → hypoactivité mésocorticale. Voie nigrostriée: motricité. Voie tubéro-infundibulaire: prolactine. Mécanisme: antagonisme D2 (~80% récepteurs). Typiques: phénothiazines (lévomépromazine), thioxanthènes (flupentixol, zuclopentixol), butyrophénones (halopéridol, dropéridol), benzamides (amisulpride, sulpiride). Atypiques: antagonisme mixte 5HT2A+D2. Aripiprazole: agoniste partiel D2 (traite + et -). Quétiapine: 25mg hypnotique, 300mg antidépresseur, 800mg antipsychotique. Clozapine: agranulocytose, myocardite, uniquement si échec autres. Olanzapine/clozapine: risque métabolique +++. IM: torsades de pointes (dropéridol, pimozide, sertindole). CI: troubles conscience, QT allongé. EI: symptômes extrapyramidaux (dystonie, parkinsonisme, dyskinésies tardives), hyperprolactinémie. Syndrome malin: hyperthermie >40°C, rigidité, akinésie → arrêt + dopamine."},
-      {name:"Antidépresseurs", icon:"💙", content:"Hypothèse monoamine: déficit NA/5-HT. ISRS: fluoxétine, fluvoxamine, paroxétine, citalopram, escitalopram, sertraline. IM ISRS: hémorragie avec antithrombotiques/AINS, hyponatrémie avec diurétiques, syndrome sérotoninergique. CYP: fluoxétine inhibiteur CYP2D6/2C9/2C19/3A4; fluvoxamine inhibiteur CYP1A2/2C9/2C19/2D6/3A4. Syndrome sérotoninergique: agitation, myoclonies, hyperthermie, rigidité musculaire. ATC: imipramine, amitriptyline, clomipramine, nortriptyline. CI: IMAO, IDM récent, arythmies, bloc AV. EI: anticholinergiques, hypotension orthostatique. IRSN: venlafaxine (CYP2D6), duloxétine (CYP1A2+2D6). Mirtazapine: antagoniste α2+5HT+H1, sédation, prise poids. Lithium (bipolaire): lithémie cible 0,6-0,8 mmol/l, marge étroite. EI lithium: tremblements, polyurie, hypothyroïdie, néphrotoxicité. CI: déshydratation, hypothyroïdie non traitée, insuffisance rénale sévère."},
-      {name:"TDAH & narcolepsie", icon:"⚡", content:"TDAH: manque contrôle voies inhibitrices SNC. Méthylphénidate (sympathicomimétique indirect, CYP2D6), atomoxétine (ISRNA, substrat CYP2D6), guanfacine (agoniste α2). Méthylphénidate enfants ≥6 ans: 5-60mg/j. IM: IMAO → poussées HTA. CI méthylphénidate: HTA modérée-sévère, psychose, troubles bipolaires, hyperthyroïdie. Narcolepsie: endormissements soudains + cataplexie. Modafinil (substrat CYP3A4, CI grossesse), pitolisant (substrat/inducteur CYP3A4, substrat/inhibiteur CYP2D6), oxybate. EI oxybate: dépression respiratoire, risque abus, énurésie. Guanfacine: QT allongement, sédation, bradycardie."},
-      {name:"Médicaments de la dépendance", icon:"🔗", content:"Alcoolisme – sevrage: BZD (diazépam/lorazépam) + thiamine B1 (encéphalopathie de Wernicke). Prévention rechutes: acamprosate (GABA-like), naltrexone (antagoniste opioïdes), nalméfène, disulfirame (réaction grave avec alcool: collapse CV). CI disulfirame: insuffisance cardiaque, HTA, psychose, risque suicidaire. Tabagisme: substitution nicotinique (innocuité favorable), varénicline (agoniste partiel nicotinique, EI nausées), bupropione (substrat CYP2B6, inhibiteur CYP2D6). CI bupropione: tumeur SNC, sevrage BZD/alcool, troubles bipolaires, schizophrénie, IMAO. Opiacés – substitution: méthadone (CYP2B6, allongement QT, 60-100mg/j) ou buprénorphine (CYP3A4, agoniste partiel, 12-24mg/j sublinguale). Association buprénorphine+naloxone: prévention abus IV."},
-      {name:"Antiparkinsoniens", icon:"🫀", content:"Parkinson: dégénérescence neurones dopaminergiques. Symptômes: hypokinésie, tremblement repos (pill-rolling), rigidité musculaire. Phases ON (dyskinésie)/OFF (akinésie). Lévodopa+bensérazide: plus efficace, complications long terme (dyskinésies, wearing-off, on-off). IM: repas protéinés diminuent absorption; antagonistes dopaminergiques diminuent effet; inhibiteurs COMT/MAO-B augmentent effet. CI: IDM récent, arythmies, psychose, glaucome angle fermé. Agonistes dopaminergiques: pramipexole, ropinirole, rotigotine, bromocriptine (dérivé ergot, réactions fibrotiques). Aussi restless legs syndrome. EI: hallucinations, somnolence soudaine, comportement compulsif (jeux, hypersexualité, boulimie). Inhibiteurs COMT: entacapone 200mg avec chaque dose lévodopa. Inhibiteurs MAO-B: rasagiline (1mg matin), safinamide (100mg matin), sélégiline. Anticholinergiques: bipéridène, trihexyphénidyle."},
-      {name:"Antiépileptiques", icon:"⚡", content:"Épilepsie: décharge neuronale anormale. Mécanismes: renforcement GABA, inhibition canaux Na+, inhibition canaux Ca2+. Types: partielles/focales vs généralisées (absences, myocloniques, tonico-cloniques). Valproate: 1er choix épilepsie généralisée, CI absolue grossesse. EI: troubles GI, prise poids, perte cheveux, thrombopénie. Substrat CYP2C9/2C19. Lamotrigine: rash fréquent (risque si augmentation trop rapide ou association valproate). IM: contraceptifs oraux diminuent lamotrigine; valproate augmente lamotrigine. Carbamazépine: 1er choix crises focales, névralgie trijumeau, troubles bipolaires. Inducteur puissant CYP1A2/2B6/2C9/3A4. EI: rash, Stevens-Johnson, hyponatrémie. Phénobarbital: place limitée, effets cognitifs négatifs. Inducteur CYP. Gabapentine/prégabaline: douleurs neuropathiques + anxiété (prégabaline). Renforcent effet opioïdes. Phénytoïne: hyperplasie gingivale, dysmorphie faciale. Allergie croisée carbamazépine. Lévétiracétam: pas d'interactions PK. Topiramate: ralentissement cognitif, CI grossesse."},
-      {name:"Antimigraineux", icon:"🤕", content:"Migraine: 10-15% population, femmes 2x plus. Rôle 5-HT. Traitement aigu: 1er intention paracétamol/AAS, 2e intention AINS + métoclopramide, 3e intention triptans (antagonistes 5-HT). Triptans: almotriptan, eletriptan, frovatriptan, naratriptan, rizatriptan, sumatriptan, zolmitriptan. IM triptans: spasmes coronariens si association dérivés ergot (intervalle ≥24h après ergot, ≥6h après triptan). CI triptans: coronaropathie, ATCD vasculaire cérébral, HTA non contrôlée, migraine hémiplégique. EI triptans: oppression thoracique, nausées, céphalées médicamenteuses (usage chronique). Prophylaxie (≥2 crises/mois): β-bloquants 1er choix (métoprolol, propranolol); alternatives: valproate, topiramate (CI grossesse tous deux), amitriptyline, flunarizine (antagoniste calcique, EI: dépression, symptômes EP, prise poids). Évaluation après 2-3 mois; arrêt progressif après 6-12 mois."},
-      {name:"Maladie d'Alzheimer", icon:"🧠", content:"Alzheimer: perte progressive neurones. MMSE: <24 atteint (20-24 léger, 10-19 modéré, <10 sévère). Causes: plaques amyloïdes (peptide Aβ) + dégénérescences neurofibrillaires (protéine Tau). Hypothèse cholinergique. Inhibiteurs cholinestérase: donépézil (5-10mg/j, substrat CYP3A4+CYP2D6), galantamine (8-24mg/j, substrat CYP3A4+CYP2D6), rivastigmine (3-12mg/j ou patch). Efficacité similaire, durée 1-2 ans. IM: antagonisme avec anticholinergiques; risque EP avec antipsychotiques; bradycardie avec β-bloquants/vérapamil. CI: risque QT allongé; galantamine: insuffisance hépatique sévère. EI: nausées, diarrhée, bradycardie, sudation, incontinence urinaire. Mémantine: antagoniste NMDA, formes modérées-sévères. EI: hallucinations, confusion, bradycardie, bloc AV."},
-      {name:"Spasticité & SEP", icon:"💪", content:"Spasticité: augmentation tonus musculaire suite lésion cérébrale/médullaire (SEP, SLA, AVC). Baclofène: analogue GABA, 1er choix spasticité spinale. Tizanidine: alternative baclofène. Dantrolène: acteur direct cellule musculaire, surtout hyperthermie maligne aujourd'hui. Toxine botulique: affections localisées. Cannabinoïdes: complément traitement SEP (efficacité limitée, minorité patients). Fampridine (4-aminopyridine): améliore périmètre de marche SEP. Évaluation clinique après ~2 mois."}
+    title:"Chapitre 11", subtitle:"Le système nerveux", icon:"🧠",
+    themes:[
+      {name:"Hypnotiques & anxiolytiques", icon:"😴", hasPrescription:true, content:"Benzodiazépines: récepteurs GABA-A, facilitent canaux chlorure. 5 effets: anxiolyse, sédation, relaxant musculaire, anticonvulsivant, amnésie antérograde. Tolérance+dépendance après 1-2 semaines. Arrêt progressif -10-20%/semaine. Courte durée (T1/2 <10h): triazolam, midazolam, zolpidem, zopiclone. Intermédiaire: alprazolam, bromazépam, lorazépam, oxazépam. Longue durée: diazépam, clonazépam, clorazépate, flurazépam. Doses équivalentes 10mg diazépam: alprazolam 0,5-1mg, lorazépam 1-2mg, triazolam 0,125-0,5mg. Substrats CYP3A4: alprazolam, flurazépam, midazolam, triazolam. CI: myasthénie, insuffisance respiratoire sévère, apnée obstructive. EI: somnolence, confusion PA, réactions paradoxales, tolérance, dépendance. Z-drugs: zopiclone/zolpidem, parasomnies. Mélatonine: CYP1A2, 2mg insomnie."},
+      {name:"Antipsychotiques", icon:"🧪", hasPrescription:true, content:"Schizophrénie: 1% population. Symptômes positifs (hallucinations, délires) → hyperactivité mésolimbique. Symptômes négatifs (anhédonie) → hypoactivité mésocorticale. Antagonisme D2 (~80% récepteurs). Typiques: phénothiazines (lévomépromazine), butyrophénones (halopéridol), benzamides (amisulpride, sulpiride). Atypiques: antagonisme 5HT2A+D2. Aripiprazole: agoniste partiel D2. Quétiapine: 25mg hypnotique, 300mg antidépresseur, 800mg antipsychotique (substrat CYP2D6→norquétiapine). Clozapine: agranulocytose, myocardite, uniquement si échec autres. IM: torsades de pointes (dropéridol, pimozide, sertindole, sulpiride, halopéridol doses élevées). CI: troubles conscience, QT allongé. EI: symptômes extrapyramidaux (dystonie, parkinsonisme, dyskinésies tardives), hyperprolactinémie. Syndrome malin: hyperthermie >40°C, rigidité → arrêt + dopamine."},
+      {name:"Antidépresseurs", icon:"💙", hasPrescription:true, content:"Hypothèse monoamine: déficit NA/5-HT. ISRS: fluoxétine, fluvoxamine, paroxétine, citalopram, escitalopram, sertraline. IM ISRS: hémorragie avec antithrombotiques/AINS, hyponatrémie avec diurétiques, syndrome sérotoninergique. Fluoxétine: inhibiteur CYP2D6/2C9/2C19/3A4. Fluvoxamine: inhibiteur CYP1A2/2C9/2C19/2D6/3A4. Syndrome sérotoninergique: agitation, myoclonies, hyperthermie, rigidité musculaire. ATC: imipramine, amitriptyline, clomipramine. CI: IMAO, IDM récent, arythmies, bloc AV. IRSN: venlafaxine (CYP2D6), duloxétine (CYP1A2+2D6). Mirtazapine: α2+5HT+H1, sédation, prise poids. Lithium (bipolaire): lithémie cible 0,6-0,8 mmol/l. CI lithium: déshydratation, hypothyroïdie non traitée, insuffisance rénale sévère."},
+      {name:"TDAH & narcolepsie", icon:"⚡", hasPrescription:true, content:"TDAH: méthylphénidate (sympathicomimétique indirect), atomoxétine (ISRNA, substrat CYP2D6), guanfacine (agoniste α2). Méthylphénidate enfants ≥6 ans: 5-60mg/j. IM: IMAO → poussées HTA. CI méthylphénidate: HTA modérée-sévère, psychose, troubles bipolaires, hyperthyroïdie. Narcolepsie: modafinil (substrat CYP3A4, CI grossesse), pitolisant (substrat/inducteur CYP3A4, substrat/inhibiteur CYP2D6). Guanfacine: QT allongement, sédation, bradycardie."},
+      {name:"Médicaments de la dépendance", icon:"🔗", hasPrescription:false, content:"Sevrage éthylique: BZD (diazépam/lorazépam) + thiamine B1. Prévention rechutes alcool: acamprosate, naltrexone, nalméfène, disulfirame. Tabagisme: substitution nicotinique, varénicline (agoniste partiel nicotinique), bupropione (substrat CYP2B6, inhibiteur CYP2D6). CI bupropione: tumeur SNC, sevrage BZD/alcool, troubles bipolaires, schizophrénie, IMAO. Opiacés: méthadone (CYP2B6, QT) + buprénorphine (CYP3A4, agoniste partiel). Association buprénorphine+naloxone: anti-abus IV."},
+      {name:"Antiparkinsoniens", icon:"🫀", hasPrescription:true, content:"Parkinson: dégénérescence dopaminergique. Symptômes: hypokinésie, tremblement repos, rigidité. Phases ON/OFF. Lévodopa+bensérazide: plus efficace, complications long terme (dyskinésies, wearing-off). IM: repas protéinés diminuent absorption; antagonistes dopaminergiques diminuent effet. CI: IDM récent, arythmies, psychose, glaucome angle fermé. Agonistes dopaminergiques: pramipexole, ropinirole, rotigotine. EI: hallucinations, somnolence, comportement compulsif. COMT: entacapone 200mg avec chaque dose lévodopa. MAO-B: rasagiline (1mg matin), safinamide (100mg matin), sélégiline."},
+      {name:"Antiépileptiques", icon:"⚡", hasPrescription:true, content:"Mécanismes: renforcement GABA, inhibition canaux Na+, canaux Ca2+. Valproate: 1er choix épilepsie généralisée, CI absolue grossesse. Lamotrigine: rash fréquent (risque si augmentation trop rapide). IM: contraceptifs oraux diminuent lamotrigine; valproate augmente lamotrigine. Carbamazépine: 1er choix crises focales. Inducteur puissant CYP1A2/2B6/2C9/3A4. EI: Stevens-Johnson, hyponatrémie. Gabapentine/prégabaline: douleurs neuropathiques, renforcent opioïdes. Phénytoïne: hyperplasie gingivale, allergie croisée carbamazépine. Lévétiracétam: pas d'interactions PK. Topiramate: ralentissement cognitif, CI grossesse."},
+      {name:"Antimigraineux", icon:"🤕", hasPrescription:false, content:"Migraine: 10-15% population, rôle 5-HT. Traitement aigu: paracétamol/AAS → AINS → triptans. Triptans (antagonistes 5-HT): almotriptan, eletriptan, sumatriptan, zolmitriptan. CI triptans: coronaropathie, HTA non contrôlée, migraine hémiplégique. EI: oppression thoracique, céphalées médicamenteuses. Prophylaxie (≥2 crises/mois): β-bloquants 1er choix; valproate/topiramate/amitriptyline/flunarizine en alternatives. Flunarizine: antagoniste calcique, EI dépression, symptômes EP."},
+      {name:"Maladie d'Alzheimer", icon:"🧠", hasPrescription:true, content:"Alzheimer: plaques amyloïdes + dégénérescences neurofibrillaires. MMSE: <24 atteint (20-24 léger, 10-19 modéré, <10 sévère). Inhibiteurs cholinestérase: donépézil (5-10mg/j, substrat CYP3A4+CYP2D6), galantamine (8-24mg/j), rivastigmine (3-12mg/j ou patch). Efficacité 1-2 ans. IM: antagonisme anticholinergiques; bradycardie avec β-bloquants/vérapamil. EI: nausées, diarrhée, bradycardie, incontinence urinaire. Mémantine: antagoniste NMDA, formes modérées-sévères."}
     ]
   }
 };
 
-// Liste plate de tous les thèmes pour le mode global
 const ALL_CHAPTERS = [
-  ...BOOK.ch9.themes.map(t=>({...t, chapterTitle:"Chapitre 9"})),
-  ...BOOK.ch11.themes.map(t=>({...t, chapterTitle:"Chapitre 11"}))
+  ...BOOK.ch3.themes,
+  ...BOOK.ch9.themes,
+  ...BOOK.ch11.themes
 ];
 
+// Types de questions disponibles selon si le thème a des prescriptions ou non
 const Q_TYPES = ["QCM","Question ouverte","Cas clinique"];
-let currentPool = [];   // thèmes utilisés pour le quiz actuel
+
+let currentPool = [];
 let currentChapterKey = null;
 let currentQIndex = 0;
 let scores = [];
 let questions = [];
 
-// ──────────────────────────────────────────────
-// NAVIGATION
 // ──────────────────────────────────────────────
 function showScreen(id){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
@@ -223,68 +240,48 @@ function showScreen(id){
   window.scrollTo(0,0);
 }
 
-// ──────────────────────────────────────────────
-// OUVERTURE D'UN CHAPITRE
-// ──────────────────────────────────────────────
 function openChapter(key){
   currentChapterKey = key;
   const ch = BOOK[key];
   document.getElementById("th-chapter-icon").textContent = ch.icon;
   document.getElementById("th-chapter-title").textContent = ch.title;
   document.getElementById("th-chapter-sub").textContent = ch.subtitle;
-
-  // Remplir la liste des thèmes
   const list = document.getElementById("theme-list");
   list.innerHTML = "";
   ch.themes.forEach(th=>{
     const div = document.createElement("div");
     div.className = "theme-row";
-    div.innerHTML = `<div class="theme-row-icon">${th.icon}</div><div class="theme-row-name">${th.name}</div><div class="theme-row-check">✓</div>`;
-    div.onclick = () => {
-      // Démarrer immédiatement sur ce thème
-      startQuiz([th]);
-    };
+    div.innerHTML = `<div class="theme-row-icon">${th.icon}</div><div class="theme-row-name">${th.name}</div><div style="color:var(--muted);font-size:16px;">›</div>`;
+    div.onclick = ()=>startQuiz([th]);
     list.appendChild(div);
   });
-
   showScreen("themes");
 }
 
-function examAllThemes(){
-  const ch = BOOK[currentChapterKey];
-  startQuiz(ch.themes);
-}
-
-// ──────────────────────────────────────────────
-// DÉMARRAGE DU QUIZ
-// ──────────────────────────────────────────────
-function startQuiz(pool){
-  currentPool = pool;
-  currentQIndex = 0;
-  scores = [];
-  questions = [];
-  showScreen("quiz");
-  loadQuestion();
-}
-
+function examAllThemes(){ startQuiz(BOOK[currentChapterKey].themes); }
+function startQuiz(pool){ currentPool=pool; currentQIndex=0; scores=[]; questions=[]; showScreen("quiz"); loadQuestion(); }
 function retryQuiz(){ startQuiz(currentPool); }
 
-// ──────────────────────────────────────────────
-// GÉNÉRATION DES QUESTIONS
 // ──────────────────────────────────────────────
 async function loadQuestion(){
   setLoading(true,"Génération de la question...");
   clearQuestion();
 
   const theme = currentPool[Math.floor(Math.random()*currentPool.length)];
-  const qtype = Q_TYPES[Math.floor(Math.random()*Q_TYPES.length)];
+  const types = theme.hasPrescription ? Q_TYPES : Q_TYPES;
+  const qtype = types[Math.floor(Math.random()*types.length)];
 
   document.getElementById("q-num-label").textContent = `Question ${currentQIndex+1}`;
   document.getElementById("prog-fill").style.width = `${Math.min(5+currentQIndex*10,95)}%`;
   document.getElementById("q-chap-badge").textContent = theme.name;
   const tb = document.getElementById("q-type-badge");
   tb.textContent = qtype;
-  tb.className = "badge "+(qtype==="QCM"?"badge-qcm":qtype==="Cas clinique"?"badge-case":"badge-open");
+  tb.className = "badge "+(
+    qtype==="QCM"?"badge-qcm":
+    qtype==="Cas clinique"?"badge-case":
+    qtype==="Prescription"?"badge-ordonnance":
+    "badge-open"
+  );
 
   let prompt = "";
   if(qtype==="QCM"){
@@ -301,12 +298,25 @@ Cours: ${theme.content}
 
 Réponds UNIQUEMENT avec ce JSON, rien d'autre, pas de backticks:
 {"question":"...","expectedPoints":["...","...","..."]}`;
-  } else {
+  } else if(qtype==="Cas clinique"){
     prompt=`Génère un cas clinique de pharmacologie sur le thème "${theme.name}".
 Cours: ${theme.content}
 
 Réponds UNIQUEMENT avec ce JSON, rien d'autre, pas de backticks:
 {"scenario":"...","question":"...","expectedPoints":["...","..."]}`;
+  } else {
+    // Prescription
+    prompt=`Tu es formateur en pharmacologie. Génère une ordonnance fictive à analyser sur le thème "${theme.name}".
+Cours: ${theme.content}
+
+L'ordonnance doit avoir 2 à 4 médicaments et contenir soit une contre-indication, soit une interaction médicamenteuse dangereuse, soit une posologie incorrecte, soit être parfaitement correcte.
+Indique un profil patient (age, sexe, antécédents brefs).
+La decision doit être "délivrer" ou "refuser".
+
+Réponds UNIQUEMENT avec ce JSON, rien d'autre, pas de backticks:
+{"patient":"ex: Homme 65 ans, insuffisance rénale modérée","medicaments":[{"nom":"...","dose":"...","posologie":"..."},{"nom":"...","dose":"...","posologie":"..."}],"decision":"délivrer","explication":"..."}
+
+Si l'ordonnance est problématique, decision="refuser". Sinon decision="délivrer".`;
   }
 
   try{
@@ -315,39 +325,33 @@ Réponds UNIQUEMENT avec ce JSON, rien d'autre, pas de backticks:
       headers:{"Content-Type":"application/json"},
       body:JSON.stringify({messages:[{role:"user",content:prompt}]})
     });
-
     if(!resp.ok) throw new Error("HTTP "+resp.status);
-
     const data = await resp.json();
     if(!data.content) throw new Error("Pas de contenu");
-
     const raw = data.content.map(b=>b.text||"").join("").trim();
     const start = raw.indexOf("{");
     const end = raw.lastIndexOf("}");
-    if(start === -1 || end === -1) throw new Error("JSON introuvable");
-
-    const q = JSON.parse(raw.slice(start, end+1));
-
-    if(qtype==="QCM" && (!q.question || !Array.isArray(q.options) || !q.correct)){
-      throw new Error("Structure QCM invalide");
-    }
-
-    q.type = qtype;
-    q.theme = theme;
+    if(start===-1||end===-1) throw new Error("JSON introuvable");
+    const q = JSON.parse(raw.slice(start,end+1));
+    if(qtype==="QCM"&&(!q.question||!Array.isArray(q.options)||!q.correct)) throw new Error("Structure invalide");
+    if(qtype==="Prescription"&&(!q.medicaments||!q.decision)) throw new Error("Structure prescription invalide");
+    q.type = qtype; q.theme = theme;
     questions.push(q);
     setLoading(false);
     renderQuestion(q);
-
   } catch(e){
     setLoading(false);
     document.getElementById("q-text").textContent = "La question n'a pas pu être générée.";
     document.getElementById("q-actions").innerHTML=`<button class="btn-primary" onclick="nextQuestion()">🔄 Nouvelle question</button>`;
   }
 }
+
 function clearQuestion(){
   document.getElementById("q-scenario").style.display="none";
   document.getElementById("q-text").textContent="";
   document.getElementById("q-options").innerHTML="";
+  document.getElementById("q-ordonnance").style.display="none";
+  document.getElementById("q-ordonnance").innerHTML="";
   document.getElementById("q-textarea").style.display="none";
   document.getElementById("q-textarea").disabled=false;
   document.getElementById("q-textarea").value="";
@@ -361,7 +365,36 @@ function renderQuestion(q){
     const sc=document.getElementById("q-scenario");
     sc.textContent=q.scenario; sc.style.display="block";
   }
+
+  if(q.type==="Prescription"){
+    // Pas de question text, on met l'instruction
+    document.getElementById("q-text").textContent="Analysez cette ordonnance et décidez si vous la délivrez.";
+    // Render ordonnance
+    const box = document.getElementById("q-ordonnance");
+    let medsHtml = q.medicaments.map((m,i)=>`
+      <div class="ordonnance-med">
+        <div class="med-num">${i+1}.</div>
+        <div class="med-info">
+          <div class="med-name">${m.nom} ${m.dose||""}</div>
+          <div class="med-dose">${m.posologie||""}</div>
+        </div>
+      </div>`).join("");
+    box.innerHTML=`
+      <div class="ordonnance">
+        <div class="ordonnance-header">📋 Ordonnance</div>
+        <div class="ordonnance-patient">👤 ${q.patient||"Patient"}</div>
+        ${medsHtml}
+      </div>
+      <div class="decision-btns">
+        <button class="btn-deliver" id="btn-deliver" onclick="answerPrescription('délivrer', this)">✓ Délivrer</button>
+        <button class="btn-refuse" id="btn-refuse" onclick="answerPrescription('refuser', this)">✗ Refuser</button>
+      </div>`;
+    box.style.display="block";
+    return;
+  }
+
   document.getElementById("q-text").textContent=q.question;
+
   if(q.type==="QCM"){
     const opts=document.getElementById("q-options");
     q.options.forEach((opt,i)=>{
@@ -374,6 +407,29 @@ function renderQuestion(q){
     document.getElementById("q-textarea").style.display="block";
     document.getElementById("q-actions").innerHTML=`<button class="btn-primary" onclick="submitOpen()">Corriger ma réponse →</button>`;
   }
+}
+
+function answerPrescription(answer, clickedBtn){
+  // Désactiver les deux boutons
+  document.getElementById("btn-deliver").disabled=true;
+  document.getElementById("btn-refuse").disabled=true;
+  const q = questions[questions.length-1];
+  const correct = q.decision === answer;
+  if(correct){
+    scores.push(1);
+    clickedBtn.style.opacity="1";
+    showFeedback("good","✓ Correct ! "+q.explication);
+  } else {
+    scores.push(0);
+    clickedBtn.style.opacity="0.4";
+    // Mettre en évidence la bonne réponse
+    const goodBtn = answer==="délivrer"
+      ? document.getElementById("btn-refuse")
+      : document.getElementById("btn-deliver");
+    goodBtn.style.opacity="1";
+    showFeedback("bad","✗ Il fallait "+(q.decision==="délivrer"?"délivrer":"refuser")+". "+q.explication);
+  }
+  showNextActions();
 }
 
 function selectOption(btn,idx,q){
@@ -400,10 +456,12 @@ Question: ${q.question}
 Points attendus: ${JSON.stringify(q.expectedPoints||[])}
 Réponse: ${answer}
 Réponds UNIQUEMENT en JSON sans backticks:
-{"score":"bon"|"partiel"|"insuffisant","pointsManquants":["..."],"feedback":"..."}`}]})
+{"score":"bon","pointsManquants":[],"feedback":"..."}`}]})
     });
     const data=await resp.json();
-    const ev=JSON.parse(data.content.map(b=>b.text||"").join("").replace(/```json|```/g,"").trim());
+    const raw=data.content.map(b=>b.text||"").join("").trim();
+    const s=raw.indexOf("{"); const e=raw.lastIndexOf("}");
+    const ev=JSON.parse(raw.slice(s,e+1));
     scores.push(ev.score==="bon"?1:ev.score==="partiel"?0.5:0);
     const icon=ev.score==="bon"?"✓":ev.score==="partiel"?"◑":"✗";
     const level=ev.score==="bon"?"good":ev.score==="partiel"?"partial":"bad";
@@ -434,11 +492,11 @@ function nextQuestion(){ currentQIndex++; loadQuestion(); }
 function setLoading(show,text=""){
   const el=document.getElementById("q-loading");
   el.className="loading"+(show?" show":"");
-  if(text) document.getElementById("q-loading-text").textContent=text;
+  if(text)document.getElementById("q-loading-text").textContent=text;
 }
 
 function showResults(){
-  const total=scores.length, sum=scores.reduce((a,b)=>a+b,0), pct=Math.round((sum/total)*100);
+  const total=scores.length,sum=scores.reduce((a,b)=>a+b,0),pct=Math.round((sum/total)*100);
   document.getElementById("res-pct").textContent=pct+"%";
   document.getElementById("res-title").textContent=pct>=80?"🎉 Excellent !":pct>=60?"👍 Bien joué !":"📚 Continue à réviser !";
   document.getElementById("res-sub").textContent=`${Math.round(sum*2)/2} / ${total} bonnes réponses`;
